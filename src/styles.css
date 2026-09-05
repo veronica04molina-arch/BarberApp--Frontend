@@ -1,1 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Segoe UI", sans-serif;
+  --font-body: "Segoe UI", sans-serif;
+}
+
+@utility btn-primary {
+  @apply min-h-11 w-full rounded-xl bg-[#1f49c2] px-4 py-3 text-sm font-bold text-white;
+  @apply shadow-[0_10px_24px_rgba(31,73,194,0.24)];
+  @apply transition duration-200;
+  @apply hover:-translate-y-1;
+  @apply hover:shadow-[0_10px_25px_rgba(41,82,227,0.35)];
+  @apply active:translate-y-0;
+  @apply disabled:cursor-wait disabled:opacity-80;
+}
