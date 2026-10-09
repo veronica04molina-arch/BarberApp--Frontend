@@ -1,0 +1,57 @@
+@if (open()) {
+  <div
+    class="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-black/50 p-4"
+    role="presentation"
+    (click)="cancel()"
+  >
+    <section
+      class="w-full max-w-md max-h-[90dvh] overflow-y-auto rounded-2xl bg-white shadow-xl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-modal-title"
+      aria-describedby="confirm-modal-message"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="p-6">
+        <div class="flex items-start gap-4">
+          <div
+            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
+            [class.bg-red-100]="variant() === 'danger'"
+            [class.text-red-600]="variant() === 'danger'"
+            [class.bg-blue-100]="variant() === 'primary'"
+            [class.text-blue-800]="variant() === 'primary'"
+          >
+            @if (variant() === 'danger') {
+              <svg lucideTrash2 class="h-5 w-5" aria-hidden="true"></svg>
+            } @else {
+              <svg lucideCircleAlert class="h-5 w-5" aria-hidden="true"></svg>
+            }
+          </div>
+          <div class="min-w-0">
+            <h2 id="confirm-modal-title" class="text-lg font-bold text-[#173a8d]">{{ title() }}</h2>
+            <p id="confirm-modal-message" class="mt-2 text-sm leading-relaxed text-gray-500">
+              {{ message() }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 border-t border-gray-100 px-6 py-4">
+        <button type="button" (click)="cancel()" class="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-50">
+          {{ cancelText() }}
+        </button>
+        <button
+          type="button"
+          (click)="confirm()"
+          class="rounded-xl px-4 py-2.5 text-sm font-bold text-white transition"
+          [class.bg-red-600]="variant() === 'danger'"
+          [class.hover:bg-red-700]="variant() === 'danger'"
+          [class.bg-blue-800]="variant() === 'primary'"
+          [class.hover:bg-blue-900]="variant() === 'primary'"
+        >
+          {{ confirmText() }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

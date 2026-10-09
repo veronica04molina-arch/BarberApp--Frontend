@@ -1,0 +1,18 @@
+.grafico-donut {
+  display: grid;
+  height: 148px;
+  width: 148px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 9999px;
+}
+
+.grafico-donut > div {
+  display: grid;
+  height: 104px;
+  width: 104px;
+  place-items: center;
+  border-radius: 9999px;
+  background: white;
+  text-align: center;
+}

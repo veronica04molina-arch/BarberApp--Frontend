@@ -1,0 +1,12 @@
+/* Estado activo del menú lateral (se aplica con routerLinkActive). */
+.enlace-activo {
+  background-color: #2852c7;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(37, 82, 199, 0.25);
+}
+
+.enlace-activo:hover {
+  background-color: #2349b5;
+  color: #ffffff;
+}

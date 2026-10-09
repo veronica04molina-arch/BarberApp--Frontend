@@ -1,0 +1,522 @@
+<div class="min-h-dvh w-full bg-[#2344a8] font-body text-gray-800">
+  <!-- CONTENIDO -->
+  <main class="min-w-0 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <div class="mx-auto max-w-[1100px]">
+      <!-- ENCABEZADO -->
+      <section
+        class="rounded-[18px] bg-white px-5 py-6 shadow-[0_8px_25px_rgba(15,39,110,0.12)] sm:px-8 sm:py-7"
+      >
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#5270ac]">
+              Gestión de citas
+            </p>
+
+            <h1 class="mt-1 text-2xl font-bold text-[#183b91] sm:text-[30px]">Agenda</h1>
+
+            <p class="mt-2 max-w-2xl text-sm leading-relaxed text-[#48618f] sm:text-base">
+              Visualiza y gestiona todas las citas programadas.
+            </p>
+          </div>
+
+          <!-- CONFIGURAR HORARIOS -->
+          <a
+            routerLink="/barbero/horarios"
+            class="inline-flex w-fit items-center gap-2 rounded-xl border border-[#dbe5ff] bg-[#f5f8ff] px-4 py-2.5 text-sm font-bold text-[#2852c7] transition hover:bg-[#edf2ff] hover:text-[#183b91]"
+          >
+            <svg lucideSettings class="h-4 w-4" aria-hidden="true"></svg>
+
+            Configurar horarios
+          </a>
+        </div>
+      </section>
+
+      <!-- FECHA -->
+      <section
+        class="mt-6 rounded-[18px] bg-white p-4 shadow-[0_8px_25px_rgba(15,39,110,0.10)] sm:p-5"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <!-- DÍA ANTERIOR -->
+          <button
+            type="button"
+            (click)="cambiarDia(-1)"
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:border-[#cddaff] hover:bg-[#f5f8ff] hover:text-[#2852c7]"
+            aria-label="Día anterior"
+          >
+            <svg lucideChevronLeft class="h-5 w-5" aria-hidden="true"></svg>
+          </button>
+
+          <!-- FECHA ACTUAL -->
+          <div class="min-w-0 text-center">
+            <div class="flex items-center justify-center gap-2">
+              <svg
+                lucideCalendarDays
+                class="h-5 w-5 shrink-0 text-[#2852c7]"
+                aria-hidden="true"
+              ></svg>
+
+              <p class="text-sm font-bold capitalize text-[#173a8d] sm:text-base">
+                {{ fechaMostrada() }}
+              </p>
+            </div>
+          </div>
+
+          <!-- DÍA SIGUIENTE -->
+          <button
+            type="button"
+            (click)="cambiarDia(1)"
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:border-[#cddaff] hover:bg-[#f5f8ff] hover:text-[#2852c7]"
+            aria-label="Día siguiente"
+          >
+            <svg lucideChevronRight class="h-5 w-5" aria-hidden="true"></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- FILTROS -->
+      <section
+        class="mt-4 rounded-[18px] bg-white p-4 shadow-[0_8px_25px_rgba(15,39,110,0.10)] sm:p-5"
+      >
+        <div
+          class="flex gap-2 overflow-x-auto pb-1"
+          role="tablist"
+          aria-label="Filtrar citas por estado"
+        >
+          @for (filtro of filtros; track filtro.valor) {
+            <button
+              type="button"
+              (click)="seleccionarFiltro(filtro.valor)"
+              [attr.aria-selected]="filtroActivo() === filtro.valor"
+              [class.bg-[#2852c7]]="filtroActivo() === filtro.valor"
+              [class.text-white]="filtroActivo() === filtro.valor"
+              [class.shadow-[0_5px_12px_rgba(37,82,199,0.20)]]="filtroActivo() === filtro.valor"
+              [class.bg-gray-50]="filtroActivo() !== filtro.valor"
+              [class.text-gray-600]="filtroActivo() !== filtro.valor"
+              [ngClass]="{
+                'bg-[#2852c7] text-white shadow-[0_5px_12px_rgba(37,82,199,0.20)]':
+                  filtroActivo() === filtro.valor,
+              }"
+              class="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold transition hover:bg-[#eef3ff] hover:text-[#2852c7]"
+            >
+              {{ filtro.etiqueta }}
+            </button>
+          }
+        </div>
+      </section>
+
+      <!-- MENSAJE DE ERROR -->
+      @if (error()) {
+        <section
+          class="mt-4 flex items-start gap-3 rounded-[18px] border border-rose-200 bg-rose-50 px-4 py-4 text-rose-700"
+          role="alert"
+        >
+          <svg lucideCircleAlert class="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true"></svg>
+
+          <div class="min-w-0">
+            <p class="text-sm font-bold">No se pudo completar la operación</p>
+
+            <p class="mt-1 text-sm leading-relaxed">
+              {{ error() }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            (click)="error.set(null)"
+            class="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-rose-500 transition hover:bg-rose-100 hover:text-rose-700"
+            aria-label="Cerrar mensaje"
+          >
+            <svg lucideX class="h-4 w-4" aria-hidden="true"></svg>
+          </button>
+        </section>
+      }
+
+      <!-- CARGANDO -->
+      @if (cargando()) {
+        <section
+          class="mt-6 rounded-[18px] bg-white px-5 py-12 text-center shadow-[0_8px_25px_rgba(15,39,110,0.10)]"
+        >
+          <svg
+            lucideLoaderCircle
+            class="mx-auto h-8 w-8 animate-spin text-[#2852c7]"
+            aria-hidden="true"
+          ></svg>
+
+          <p class="mt-3 text-sm font-semibold text-gray-600">Cargando citas...</p>
+
+          <p class="mt-1 text-xs text-gray-400">Estamos consultando la agenda para esta fecha.</p>
+        </section>
+      }
+
+      <!-- CONTENIDO DE CITAS -->
+      @if (!cargando()) {
+        @if (citasFiltradas().length > 0) {
+          <section class="mt-6 space-y-4" aria-label="Citas">
+            @for (cita of citasFiltradas(); track cita.id) {
+              <article
+                [id]="'cita-' + cita.id"
+                [class.ring-4]="idCitaResaltada() === cita.id"
+                [class.ring-[#2563eb]/40]="idCitaResaltada() === cita.id"
+                [class.bg-[#eef4ff]]="idCitaResaltada() === cita.id"
+                [class.bg-white]="idCitaResaltada() !== cita.id"
+                class="rounded-[18px] p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)] transition hover:shadow-[0_10px_28px_rgba(15,39,110,0.14)] sm:p-6"
+              >
+                <!-- CABECERA DE LA CITA -->
+                <div
+                  class="flex flex-col gap-4 border-b border-gray-100 pb-5 sm:flex-row sm:items-start sm:justify-between"
+                >
+                  <div class="flex items-start gap-4">
+                    <!-- HORA -->
+                    <div
+                      class="flex min-w-[82px] flex-col items-center justify-center rounded-2xl bg-[#f3f6ff] px-3 py-3 text-center"
+                    >
+                      <svg lucideClock3 class="h-5 w-5 text-[#2852c7]" aria-hidden="true"></svg>
+
+                      <time
+                        class="mt-1 text-sm font-bold text-[#173a8d]"
+                        [attr.datetime]="cita.hora"
+                      >
+                        {{ cita.hora.slice(0, 5) }}
+                      </time>
+                    </div>
+
+                    <!-- CLIENTE -->
+                    <div class="min-w-0">
+                      <p class="text-xs font-bold uppercase tracking-[0.08em] text-[#5270ac]">
+                        Cliente
+                      </p>
+
+                      @if (cita.nombreCliente) {
+                        <h2 class="mt-1 text-lg font-bold text-[#173a8d]">
+                          {{ cita.nombreCliente }}
+                        </h2>
+                      } @else {
+                        <p class="mt-1 text-sm font-semibold text-gray-500">
+                          Cliente no disponible
+                        </p>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- ESTADO -->
+                  <span
+                    class="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ring-1 ring-inset"
+                    [ngClass]="clasesEstado(cita.estado)"
+                  >
+                    @if (cita.estado === 'completada') {
+                      <svg lucideCircleCheckBig class="h-3.5 w-3.5" aria-hidden="true"></svg>
+                    } @else if (cita.estado === 'cancelada') {
+                      <svg lucideCircleAlert class="h-3.5 w-3.5" aria-hidden="true"></svg>
+                    } @else {
+                      <svg lucideClock3 class="h-3.5 w-3.5" aria-hidden="true"></svg>
+                    }
+
+                    {{ etiquetaEstado(cita.estado) }}
+                  </span>
+                </div>
+
+                <!-- INFORMACIÓN -->
+                <div class="grid gap-4 py-5 sm:grid-cols-2">
+                  <!-- SERVICIOS -->
+                  <div class="flex items-start gap-3">
+                    <div
+                      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563eb]"
+                    >
+                      <svg lucideScissors class="h-4 w-4" aria-hidden="true"></svg>
+                    </div>
+
+                    <div class="min-w-0">
+                      <p class="text-xs font-bold text-gray-400">Servicio</p>
+
+                      @if (cita.servicios.length > 0) {
+                        <p class="mt-1 text-sm font-semibold leading-relaxed text-gray-700">
+                          {{ cita.servicios.join(', ') }}
+                        </p>
+                      } @else {
+                        <p class="mt-1 text-sm text-gray-500">No hay servicios registrados.</p>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- FECHA -->
+                  <div class="flex items-start gap-3">
+                    <div
+                      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563eb]"
+                    >
+                      <svg lucideCalendarDays class="h-4 w-4" aria-hidden="true"></svg>
+                    </div>
+
+                    <div class="min-w-0">
+                      <p class="text-xs font-bold text-gray-400">Fecha</p>
+
+                      <p class="mt-1 text-sm font-semibold text-gray-700">
+                        {{ cita.fecha }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- NOTAS -->
+                  @if (cita.notas) {
+                    <div class="flex items-start gap-3 sm:col-span-2">
+                      <div
+                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500"
+                      >
+                        <svg lucideStickyNote class="h-4 w-4" aria-hidden="true"></svg>
+                      </div>
+
+                      <div class="min-w-0">
+                        <p class="text-xs font-bold text-gray-400">Notas</p>
+
+                        <p class="mt-1 text-sm leading-relaxed text-gray-700">
+                          {{ cita.notas }}
+                        </p>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- ACCIONES -->
+                <div
+                  class="flex flex-col gap-2 border-t border-gray-100 pt-4 sm:flex-row sm:justify-end"
+                >
+                  <!-- VER DETALLES -->
+                  <button
+                    type="button"
+                    (click)="verDetalles(cita.id)"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 transition hover:border-[#cddaff] hover:bg-[#f5f8ff] hover:text-[#2852c7]"
+                  >
+                    <svg lucideEye class="h-4 w-4" aria-hidden="true"></svg>
+
+                    Ver detalles
+                  </button>
+
+                  <!-- COMPLETAR -->
+                  @if (puedeCompletar(cita)) {
+                    <button
+                      type="button"
+                      (click)="marcarComoCompletada(cita)"
+                      [disabled]="completandoId() !== null"
+                      class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2852c7] px-4 py-2.5 text-sm font-bold text-white shadow-[0_5px_12px_rgba(37,82,199,0.20)] transition hover:bg-[#1f45af] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      @if (completandoId() === cita.id) {
+                        <svg
+                          lucideLoaderCircle
+                          class="h-4 w-4 animate-spin"
+                          aria-hidden="true"
+                        ></svg>
+
+                        Completando...
+                      } @else {
+                        <svg lucideCircleCheckBig class="h-4 w-4" aria-hidden="true"></svg>
+
+                        Marcar como completada
+                      }
+                    </button>
+                  }
+                </div>
+              </article>
+            }
+          </section>
+        } @else {
+          <!-- ESTADO VACÍO -->
+          <section
+            class="mt-6 rounded-[18px] bg-white px-5 py-12 text-center shadow-[0_8px_25px_rgba(15,39,110,0.10)] sm:px-8"
+          >
+            <div
+              class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f3f6ff] text-[#2852c7]"
+            >
+              <svg lucideCalendarDays class="h-7 w-7" aria-hidden="true"></svg>
+            </div>
+
+            @if (filtroActivo() === 'todas') {
+              <h2 class="mt-4 text-lg font-bold text-[#173a8d]">No tienes citas agendadas</h2>
+
+              <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-gray-500">
+                No hay citas programadas para esta fecha.
+              </p>
+            } @else {
+              <h2 class="mt-4 text-lg font-bold text-[#173a8d]">No hay citas con este estado</h2>
+
+              <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-gray-500">
+                No existen citas que correspondan al filtro seleccionado para esta fecha.
+              </p>
+            }
+          </section>
+        }
+      }
+    </div>
+  </main>
+
+  <!-- MODAL DE DETALLES -->
+  @if (cargandoDetalle()) {
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-[#0f276e]/45 px-4 backdrop-blur-[2px]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Cargando detalles"
+    >
+      <div class="w-full max-w-md rounded-[20px] bg-white p-7 text-center shadow-2xl">
+        <svg
+          lucideLoaderCircle
+          class="mx-auto h-8 w-8 animate-spin text-[#2852c7]"
+          aria-hidden="true"
+        ></svg>
+
+        <p class="mt-3 text-sm font-semibold text-gray-600">Cargando detalles de la cita...</p>
+      </div>
+    </div>
+  }
+
+  @if (citaDetalle()) {
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#0f276e]/45 px-4 py-6 backdrop-blur-[2px]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titulo-detalle-cita"
+    >
+      <div class="w-full max-w-lg rounded-[20px] bg-white shadow-2xl">
+        <!-- MODAL HEADER -->
+        <div
+          class="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-5 sm:px-6"
+        >
+          <div class="min-w-0">
+            <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#5270ac]">
+              Detalle de la cita
+            </p>
+
+            <h2 id="titulo-detalle-cita" class="mt-1 text-xl font-bold text-[#173a8d]">
+              {{ citaDetalle()?.nombreCliente || 'Cliente no disponible' }}
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            (click)="cerrarDetalles()"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+            aria-label="Cerrar detalles"
+          >
+            <svg lucideX class="h-5 w-5" aria-hidden="true"></svg>
+          </button>
+        </div>
+
+        <!-- MODAL BODY -->
+        <div class="space-y-5 px-5 py-5 sm:px-6">
+          <!-- ESTADO -->
+          <div>
+            <p class="text-xs font-bold text-gray-400">Estado</p>
+
+            <span
+              class="mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ring-1 ring-inset"
+              [ngClass]="clasesEstado(citaDetalle()?.estado ?? '')"
+            >
+              @if (citaDetalle()?.estado === 'completada') {
+                <svg lucideCircleCheckBig class="h-3.5 w-3.5" aria-hidden="true"></svg>
+              } @else if (citaDetalle()?.estado === 'cancelada') {
+                <svg lucideCircleAlert class="h-3.5 w-3.5" aria-hidden="true"></svg>
+              } @else {
+                <svg lucideClock3 class="h-3.5 w-3.5" aria-hidden="true"></svg>
+              }
+
+              {{ etiquetaEstado(citaDetalle()?.estado ?? '') }}
+            </span>
+          </div>
+
+          <!-- FECHA Y HORA -->
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="rounded-2xl bg-gray-50 p-4">
+              <div class="flex items-center gap-2">
+                <svg lucideCalendarDays class="h-4 w-4 text-[#2852c7]" aria-hidden="true"></svg>
+
+                <p class="text-xs font-bold text-gray-400">Fecha</p>
+              </div>
+
+              <p class="mt-2 text-sm font-bold text-gray-700">
+                {{ citaDetalle()?.fecha }}
+              </p>
+            </div>
+
+            <div class="rounded-2xl bg-gray-50 p-4">
+              <div class="flex items-center gap-2">
+                <svg lucideClock3 class="h-4 w-4 text-[#2852c7]" aria-hidden="true"></svg>
+
+                <p class="text-xs font-bold text-gray-400">Hora</p>
+              </div>
+
+              <p class="mt-2 text-sm font-bold text-gray-700">
+                {{ citaDetalle()?.hora?.slice(0, 5) }}
+              </p>
+            </div>
+          </div>
+
+          <!-- SERVICIOS -->
+          <div>
+            <div class="flex items-center gap-2">
+              <svg lucideScissors class="h-4 w-4 text-[#2852c7]" aria-hidden="true"></svg>
+
+              <p class="text-xs font-bold text-gray-400">Servicios</p>
+            </div>
+
+            <div class="mt-2 flex flex-wrap gap-2">
+              @for (servicio of citaDetalle()?.servicios ?? []; track servicio) {
+                <span
+                  class="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#2852c7]"
+                >
+                  {{ servicio }}
+                </span>
+              } @empty {
+                <p class="text-sm text-gray-500">No hay servicios registrados.</p>
+              }
+            </div>
+          </div>
+
+          <!-- NOTAS -->
+          @if (citaDetalle()?.notas) {
+            <div>
+              <div class="flex items-center gap-2">
+                <svg lucideStickyNote class="h-4 w-4 text-gray-500" aria-hidden="true"></svg>
+
+                <p class="text-xs font-bold text-gray-400">Notas</p>
+              </div>
+
+              <p class="mt-2 rounded-xl bg-gray-50 p-4 text-sm leading-relaxed text-gray-700">
+                {{ citaDetalle()?.notas }}
+              </p>
+            </div>
+          }
+        </div>
+
+        <!-- MODAL FOOTER -->
+        <div
+          class="flex flex-col-reverse gap-2 border-t border-gray-100 px-5 py-4 sm:flex-row sm:justify-end sm:px-6"
+        >
+          <button
+            type="button"
+            (click)="cerrarDetalles()"
+            class="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-50"
+          >
+            Cerrar
+          </button>
+
+          @if (citaDetalle() && puedeCompletar(citaDetalle()!)) {
+            <button
+              type="button"
+              (click)="marcarComoCompletada(citaDetalle()!)"
+              [disabled]="completandoId() !== null"
+              class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2852c7] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#1f45af] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              @if (completandoId() === citaDetalle()?.id) {
+                <svg lucideLoaderCircle class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+
+                Completando...
+              } @else {
+                <svg lucideCircleCheckBig class="h-4 w-4" aria-hidden="true"></svg>
+
+                Marcar como completada
+              }
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

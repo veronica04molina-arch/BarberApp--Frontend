@@ -1,0 +1,245 @@
+<main class="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div class="mx-auto max-w-[1100px]">
+        <a
+          routerLink="/cliente/servicios"
+          class="mb-5 inline-flex items-center gap-2 rounded-lg text-sm font-semibold text-white transition hover:text-blue-100"
+        >
+          <svg lucideArrowLeft class="h-4 w-4" aria-hidden="true"></svg>
+          Volver a servicios
+        </a>
+
+        <section
+          class="rounded-[18px] bg-white px-5 py-6 shadow-[0_8px_25px_rgba(15,39,110,0.12)] sm:px-8 sm:py-7"
+        >
+          <div class="flex items-center gap-3">
+            <span
+              class="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#2b61dc] to-[#23449e] text-white"
+            >
+              <svg lucideCalendarDays class="h-6 w-6" aria-hidden="true"></svg>
+            </span>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#5270ac]">
+                Agenda tu cita
+              </p>
+              <h1 class="text-2xl font-bold text-[#183b91] sm:text-[30px]">Elige fecha y hora</h1>
+            </div>
+          </div>
+          <p class="mt-3 max-w-2xl text-sm leading-relaxed text-[#48618f] sm:text-base">
+            Revisa los servicios seleccionados, elige un horario disponible y confirma tu cita.
+          </p>
+        </section>
+
+        @if (cargandoDatos()) {
+          <p
+            class="mt-6 rounded-[18px] bg-white p-6 text-sm text-gray-500 shadow-sm"
+            role="status"
+          >
+            Cargando los datos de tu cita…
+          </p>
+        } @else if (!barberoSeleccionado) {
+          <section class="mt-6 rounded-[18px] bg-white p-6 shadow-sm" role="alert">
+            <p class="text-sm text-red-700">
+              {{ errorGeneral || 'No se encontró la selección de tu cita.' }}
+            </p>
+            <button type="button" (click)="regresarServicios()" class="btn-primary mt-5 sm:w-auto">
+              Volver a servicios
+            </button>
+          </section>
+        } @else {
+          @if (errorGeneral) {
+            <p
+              class="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              role="alert"
+            >
+              {{ errorGeneral }}
+            </p>
+          }
+
+          <div class="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_330px]">
+            <section class="min-w-0 space-y-6" aria-label="Datos de la cita">
+              <div
+                class="rounded-[18px] bg-white p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)] sm:p-6"
+              >
+                <h2 class="flex items-center gap-2 text-lg font-bold text-[#173a8d]">
+                  <svg lucideCalendarDays class="h-5 w-5 text-[#2563eb]" aria-hidden="true"></svg>
+                  Selecciona la fecha
+                </h2>
+                <label for="fecha-cita" class="mt-4 block text-sm font-semibold text-gray-700">
+                  Fecha de la cita
+                </label>
+                <input
+                  id="fecha-cita"
+                  name="fecha"
+                  type="date"
+                  [min]="obtenerFechaMinima()"
+                  [(ngModel)]="fechaSeleccionada"
+                  (ngModelChange)="seleccionarFecha()"
+                  class="mt-2 min-h-12 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-800 outline-none transition focus:border-[#2852c7] focus:ring-2 focus:ring-blue-100 sm:max-w-sm"
+                />
+              </div>
+
+              <div
+                class="rounded-[18px] bg-white p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)] sm:p-6"
+              >
+                <h2 class="flex items-center gap-2 text-lg font-bold text-[#173a8d]">
+                  <svg lucideClock class="h-5 w-5 text-[#2563eb]" aria-hidden="true"></svg>
+                  Horarios disponibles
+                </h2>
+                <p class="mt-1 text-sm text-gray-500">
+                  @if (fechaSeleccionada) {
+                    Selecciona el horario que más te convenga.
+                  } @else {
+                    Primero selecciona la fecha de tu cita.
+                  }
+                </p>
+
+                @if (cargandoHorarios()) {
+                  <p class="mt-4 rounded-xl bg-blue-50 px-4 py-3 text-sm text-[#2852c7]" role="status">
+                    Buscando horarios disponibles…
+                  </p>
+                } @else if (errorHorarios) {
+                  <p class="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+                    {{ errorHorarios }}
+                  </p>
+                } @else if (mensajeHorarios) {
+                  <p class="mt-4 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-600" role="status">
+                    {{ mensajeHorarios }}
+                  </p>
+                } @else if (horariosDisponibles.length > 0) {
+                  <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    @for (hora of horariosDisponibles; track hora) {
+                      <button
+                        type="button"
+                        (click)="seleccionarHora(hora)"
+                        [attr.aria-pressed]="horaSeleccionada === hora"
+                        [class.border-[#2852c7]]="horaSeleccionada === hora"
+                        [class.bg-blue-50]="horaSeleccionada === hora"
+                        [class.text-[#2148b6]]="horaSeleccionada === hora"
+                        class="min-h-11 rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:border-[#2852c7] hover:bg-blue-50"
+                      >
+                        {{ formatearHora(hora) }}
+                      </button>
+                    }
+                  </div>
+                } @else {
+                  <p class="mt-4 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-500" role="status">
+                    Los horarios aparecerán cuando elijas una fecha.
+                  </p>
+                }
+              </div>
+
+              <div
+                class="rounded-[18px] bg-white p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)] sm:p-6"
+              >
+                <label for="notas-cita" class="flex items-center gap-2 text-lg font-bold text-[#173a8d]">
+                  <svg lucideReceipt class="h-5 w-5 text-[#2563eb]" aria-hidden="true"></svg>
+                  Nota para el barbero
+                  <span class="text-sm font-normal text-gray-400">(opcional)</span>
+                </label>
+                <textarea
+                  id="notas-cita"
+                  name="notas"
+                  rows="3"
+                  maxlength="500"
+                  [(ngModel)]="notas"
+                  placeholder="¿Hay algo que debamos saber antes de tu cita?"
+                  class="mt-4 w-full resize-y rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-[#2852c7] focus:ring-2 focus:ring-blue-100"
+                ></textarea>
+              </div>
+            </section>
+
+            <aside
+              class="h-fit rounded-[18px] border border-gray-100 bg-white p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)] sm:p-6 lg:sticky lg:top-6"
+              aria-label="Resumen de la cita"
+            >
+              <h2 class="flex items-center gap-2 text-lg font-bold text-[#173a8d]">
+                <svg lucideReceipt class="h-5 w-5 text-[#2563eb]" aria-hidden="true"></svg>
+                Resumen de tu cita
+              </h2>
+
+              <div class="mt-4 flex items-center gap-3 rounded-xl bg-[#f1f4fb] px-4 py-3">
+                <span
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[#2852c7]"
+                >
+                  <svg lucideUser class="h-5 w-5" aria-hidden="true"></svg>
+                </span>
+                <div class="min-w-0">
+                  <p class="text-xs text-gray-500">Tu barbero</p>
+                  <p class="truncate text-sm font-semibold text-gray-800">
+                    {{ barberoSeleccionado.nombre }}
+                  </p>
+                </div>
+              </div>
+
+              <ul class="mt-4 space-y-3">
+                @for (servicio of serviciosSeleccionados; track servicio.id) {
+                  <li class="flex items-start justify-between gap-3 text-sm">
+                    <span class="min-w-0 text-gray-700">
+                      {{ servicio.nombre }}
+                      <span class="mt-0.5 block text-xs text-gray-500">
+                        {{ servicio.duracion }} min
+                      </span>
+                    </span>
+                    <span class="shrink-0 font-semibold text-[#203f91]">
+                      {{ servicio.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' : 'es-CO' }}
+                    </span>
+                  </li>
+                }
+              </ul>
+
+              <div class="my-4 border-t border-dashed border-gray-200"></div>
+              <dl class="space-y-2 text-sm">
+                <div class="flex items-center justify-between gap-3">
+                  <dt class="text-gray-500">Duración</dt>
+                  <dd class="font-semibold text-gray-800">{{ totalDuracion }} min</dd>
+                </div>
+                <div class="flex items-center justify-between gap-3">
+                  <dt class="text-gray-500">Total</dt>
+                  <dd class="font-bold text-[#173a8d]">
+                    {{ totalPrecio | currency: 'COP' : 'symbol-narrow' : '1.0-0' : 'es-CO' }}
+                  </dd>
+                </div>
+                @if (fechaSeleccionada) {
+                  <div class="flex items-center justify-between gap-3">
+                    <dt class="text-gray-500">Fecha</dt>
+                    <dd class="font-semibold text-gray-800">{{ fechaSeleccionada }}</dd>
+                  </div>
+                }
+                @if (horaSeleccionada) {
+                  <div class="flex items-center justify-between gap-3">
+                    <dt class="text-gray-500">Hora</dt>
+                    <dd class="font-semibold text-gray-800">{{ formatearHora(horaSeleccionada) }}</dd>
+                  </div>
+                }
+              </dl>
+
+              <button
+                type="button"
+                (click)="confirmarCita()"
+                [disabled]="!puedeConfirmar()"
+                class="btn-primary mt-5 flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                @if (guardandoCita()) {
+                  Confirmando cita...
+                } @else {
+                  Confirmar cita
+                }
+                <svg lucideCalendarPlus class="h-4 w-4" aria-hidden="true"></svg>
+              </button>
+              <p class="mt-3 text-center text-xs leading-relaxed text-gray-500">
+                El horario se confirmará cuando guardemos tu cita.
+              </p>
+            </aside>
+          </div>
+        }
+      </div>
+    </main>
+
+    <footer
+      class="flex flex-col gap-2 bg-[#3658b3] px-4 py-5 text-center text-xs text-white/90 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:text-sm lg:px-8"
+    >
+      <a href="mailto:barberapp.soporte@gmail.com" class="font-semibold hover:underline">
+        barberapp.soporte@gmail.com
+      </a>
+      <span>© 2026 BarberApp. Todos los derechos reservados.</span>
+    </footer>

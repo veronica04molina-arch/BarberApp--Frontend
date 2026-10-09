@@ -1,0 +1,336 @@
+<main class="min-w-0 bg-[#2344a8] px-4 py-6 font-body text-gray-800 sm:px-6 sm:py-8 lg:px-8">
+  <div class="mx-auto max-w-[1100px]">
+    <section class="rounded-[18px] bg-white px-5 py-6 shadow-[0_8px_25px_rgba(15,39,110,0.12)] sm:px-8 sm:py-7">
+      <div class="flex items-start gap-4">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#eef3ff] text-[#2852c7]">
+          <svg lucideCalendarClock class="h-5 w-5" aria-hidden="true"></svg>
+        </div>
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#5270ac]">Disponibilidad</p>
+          <h1 class="mt-1 text-2xl font-bold text-[#183b91] sm:text-[30px]">Configurar horarios</h1>
+          <p class="mt-2 max-w-2xl text-sm leading-relaxed text-[#48618f] sm:text-base">
+            Define tus horarios de atención y administra tus excepciones.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    @if (error()) {
+      <app-alert-banner type="error" [message]="error()!" (closed)="error.set(null)" />
+    }
+
+    @if (exito()) {
+      <app-alert-banner type="success" [message]="exito()!" (closed)="exito.set(null)" />
+    }
+
+    <section class="mt-6 rounded-[18px] bg-white p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)] sm:p-6" aria-labelledby="horario-semanal">
+      <div class="flex items-center gap-3 border-b border-gray-100 pb-5">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef3ff] text-[#2852c7]">
+          <svg lucideClock3 class="h-5 w-5" aria-hidden="true"></svg>
+        </div>
+        <div>
+          <h2 id="horario-semanal" class="text-lg font-bold text-[#173a8d]">Horario semanal</h2>
+          <p class="mt-0.5 text-sm text-gray-500">Configura uno o varios bloques de atención por día.</p>
+        </div>
+      </div>
+
+      @if (cargando()) {
+        <div class="flex flex-col items-center px-5 py-12 text-center">
+          <svg lucideLoaderCircle class="h-8 w-8 animate-spin text-[#2852c7]" aria-hidden="true"></svg>
+          <p class="mt-3 text-sm font-semibold text-gray-600">Cargando horarios...</p>
+        </div>
+      } @else {
+        <div class="mt-5 divide-y divide-gray-100">
+          @for (dia of dias; track dia.valor) {
+            <article class="py-5 first:pt-0 last:pb-0 sm:flex sm:items-start sm:justify-between sm:gap-6">
+              <div class="sm:w-32 sm:shrink-0">
+                <h3 class="text-base font-bold text-[#173a8d]">{{ dia.etiqueta }}</h3>
+              </div>
+
+              <div class="mt-3 min-w-0 flex-1 sm:mt-0">
+                @if (horariosDelDia(dia.valor).length > 0) {
+                  <div class="space-y-3">
+                    @for (horario of horariosDelDia(dia.valor); track horario.id) {
+                      <div class="rounded-xl border border-gray-100 bg-[#fbfcff] p-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
+                        <div class="flex items-start gap-3">
+                          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eef3ff] text-[#2852c7]">
+                            <svg lucideClock3 class="h-4 w-4" aria-hidden="true"></svg>
+                          </div>
+                          <div>
+                            <p class="text-sm font-bold text-gray-800">{{ formatearHora(horario.horaInicio) }} — {{ formatearHora(horario.horaFin) }}</p>
+                            <span class="mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-bold" [class.bg-emerald-50]="horario.estado === 'disponible'" [class.text-emerald-700]="horario.estado === 'disponible'" [class.bg-gray-100]="horario.estado === 'no_disponible'" [class.text-gray-600]="horario.estado === 'no_disponible'">
+                              {{ etiquetaEstado(horario.estado) }}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap items-center gap-2 sm:mt-0 sm:justify-end">
+                          <label class="sr-only" [for]="'estado-' + horario.id">Estado del horario</label>
+                          <select [id]="'estado-' + horario.id" [value]="horario.estado" (change)="cambiarEstado(horario, $any($event.target).value)" [disabled]="actualizandoEstadoId() === horario.id" class="rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-xs font-bold text-gray-700 outline-none transition focus:border-[#2852c7] focus:ring-2 focus:ring-[#dbe5ff] disabled:cursor-not-allowed disabled:opacity-60">
+                            <option value="disponible">Disponible</option>
+                            <option value="no_disponible">No disponible</option>
+                          </select>
+                          <button type="button" (click)="editarHorario(horario)" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#2852c7] transition hover:bg-[#eef3ff]" aria-label="Editar horario">
+                            <svg lucidePencil class="h-4 w-4" aria-hidden="true"></svg>
+                          </button>
+                          <button type="button" (click)="eliminarHorario(horario)" [disabled]="eliminandoId() === horario.id" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60" aria-label="Eliminar horario">
+                            @if (eliminandoId() === horario.id) {
+                              <svg lucideLoaderCircle class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+                            } @else {
+                              <svg lucideTrash2 class="h-4 w-4" aria-hidden="true"></svg>
+                            }
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="rounded-xl bg-gray-50 px-3 py-3 text-sm text-gray-500">No hay horarios configurados</p>
+                }
+
+                <button type="button" (click)="abrirNuevoHorario(dia.valor)" class="mt-3 inline-flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-bold text-[#2852c7] transition hover:bg-[#eef3ff]">
+                  <svg lucidePlus class="h-4 w-4" aria-hidden="true"></svg>
+                  Agregar horario
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="mt-6 rounded-[18px] bg-white p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)] sm:p-6" aria-labelledby="excepciones-horario">
+      <div class="flex flex-col gap-4 border-b border-gray-100 pb-5 sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex items-start gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eef3ff] text-[#2852c7]">
+            <svg lucideCalendarClock class="h-5 w-5" aria-hidden="true"></svg>
+          </div>
+          <div>
+            <h2 id="excepciones-horario" class="text-lg font-bold text-[#173a8d]">Excepciones de horario</h2>
+            <p class="mt-1 text-sm leading-relaxed text-gray-500">Registra cambios puntuales en tu disponibilidad.</p>
+          </div>
+        </div>
+        <button type="button" (click)="abrirNuevaExcepcion()" class="inline-flex w-fit items-center justify-center gap-2 rounded-xl bg-[#2852c7] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#1f45af]">
+          <svg lucidePlus class="h-4 w-4" aria-hidden="true"></svg>
+          Agregar excepción
+        </button>
+      </div>
+
+      @if (cargandoExcepciones()) {
+        <div class="flex flex-col items-center px-5 py-12 text-center">
+          <svg lucideLoaderCircle class="h-8 w-8 animate-spin text-[#2852c7]" aria-hidden="true"></svg>
+          <p class="mt-3 text-sm font-semibold text-gray-600">Cargando excepciones...</p>
+        </div>
+      } @else if (excepciones().length === 0) {
+        <div class="px-4 py-12 text-center">
+          <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-[#eef3ff] text-[#2852c7]">
+            <svg lucideCalendarClock class="h-5 w-5" aria-hidden="true"></svg>
+          </div>
+          <p class="mt-4 font-bold text-[#173a8d]">No hay excepciones de horario</p>
+          <p class="mt-1 text-sm text-gray-500">Actualmente no tienes excepciones registradas.</p>
+        </div>
+      } @else {
+        <div class="mt-5 space-y-3">
+          @for (excepcion of excepciones(); track excepcion.id) {
+            <article class="rounded-xl border border-gray-100 bg-[#fbfcff] p-4 sm:flex sm:items-start sm:justify-between sm:gap-5">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <p class="text-sm font-bold capitalize text-gray-800">{{ formatearFecha(excepcion.fecha) }}</p>
+                  <span class="inline-flex rounded-full bg-[#eef3ff] px-2.5 py-1 text-xs font-bold text-[#2852c7]">
+                    {{ etiquetaTipoExcepcion(excepcion.tipo) }}
+                  </span>
+                </div>
+                <p class="mt-2 flex items-center gap-1.5 text-sm font-semibold text-gray-600">
+                  <svg lucideClock3 class="h-4 w-4 text-[#5270ac]" aria-hidden="true"></svg>
+                  {{ horarioExcepcion(excepcion) }}
+                </p>
+                @if (excepcion.motivo) {
+                  <p class="mt-2 text-sm leading-relaxed text-gray-500">{{ excepcion.motivo }}</p>
+                }
+              </div>
+
+              <div class="mt-3 flex items-center gap-2 sm:mt-0 sm:shrink-0">
+                <button type="button" (click)="editarExcepcion(excepcion)" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#2852c7] transition hover:bg-[#eef3ff]" aria-label="Editar excepción">
+                  <svg lucidePencil class="h-4 w-4" aria-hidden="true"></svg>
+                </button>
+                <button type="button" (click)="solicitarEliminacionExcepcion(excepcion)" [disabled]="eliminandoExcepcionId() === excepcion.id" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60" aria-label="Eliminar excepción">
+                  @if (eliminandoExcepcionId() === excepcion.id) {
+                    <svg lucideLoaderCircle class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+                  } @else {
+                    <svg lucideTrash2 class="h-4 w-4" aria-hidden="true"></svg>
+                  }
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  </div>
+
+  @if (formularioAbierto()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4" role="presentation">
+      <section class="flex max-h-[90dvh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-xl" role="dialog" aria-modal="true" aria-labelledby="titulo-formulario-horario">
+        <div class="flex shrink-0 items-start justify-between gap-4 border-b border-gray-100 px-5 py-5 sm:px-6">
+          <div>
+            <h2 id="titulo-formulario-horario" class="text-lg font-bold text-[#173a8d]">{{ formulario().id === null ? 'Agregar horario' : 'Editar horario' }}</h2>
+            <p class="mt-1 text-sm text-gray-500">Define el bloque de atención semanal.</p>
+          </div>
+          <button type="button" (click)="cerrarFormulario()" [disabled]="guardando()" class="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 disabled:opacity-60" aria-label="Cerrar formulario">
+            <svg lucideX class="h-5 w-5" aria-hidden="true"></svg>
+          </button>
+        </div>
+
+        <form (ngSubmit)="guardarHorario()" class="flex min-h-0 flex-1 flex-col">
+          <div class="min-h-0 flex-1 space-y-5 overflow-y-auto p-6">
+            @if (error()) {
+              <div class="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm text-rose-700" role="alert">
+                <svg lucideCircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true"></svg>
+                <p>{{ error() }}</p>
+              </div>
+            }
+
+          <div>
+            <label for="dia-semana" class="mb-1.5 block text-sm font-bold text-gray-700">Día</label>
+            <select id="dia-semana" [ngModel]="formulario().diaSemana" (ngModelChange)="actualizarCampo('diaSemana', $event)" name="diaSemana" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#2852c7] focus:ring-2 focus:ring-[#dbe5ff]">
+              @for (dia of dias; track dia.valor) {
+                <option [value]="dia.valor">{{ dia.etiqueta }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label for="hora-inicio" class="mb-1.5 block text-sm font-bold text-gray-700">Hora inicial</label>
+              <input id="hora-inicio" type="time" [ngModel]="formulario().horaInicio" (ngModelChange)="actualizarCampo('horaInicio', $event)" name="horaInicio" required class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#2852c7] focus:ring-2 focus:ring-[#dbe5ff]" />
+            </div>
+            <div>
+              <label for="hora-fin" class="mb-1.5 block text-sm font-bold text-gray-700">Hora final</label>
+              <input id="hora-fin" type="time" [ngModel]="formulario().horaFin" (ngModelChange)="actualizarCampo('horaFin', $event)" name="horaFin" required class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#2852c7] focus:ring-2 focus:ring-[#dbe5ff]" />
+            </div>
+          </div>
+
+          <div>
+            <label for="estado" class="mb-1.5 block text-sm font-bold text-gray-700">Estado</label>
+            <select id="estado" [ngModel]="formulario().estado" (ngModelChange)="actualizarCampo('estado', $event)" name="estado" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#2852c7] focus:ring-2 focus:ring-[#dbe5ff]">
+              <option value="disponible">Disponible</option>
+              <option value="no_disponible">No disponible</option>
+            </select>
+          </div>
+
+          </div>
+
+          <div class="flex shrink-0 justify-end gap-3 border-t border-gray-100 p-4">
+            <button type="button" (click)="cerrarFormulario()" [disabled]="guardando()" class="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60">Cancelar</button>
+            <button type="submit" [disabled]="guardando()" class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2852c7] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#1f45af] disabled:cursor-not-allowed disabled:opacity-60">
+              @if (guardando()) {
+                <svg lucideLoaderCircle class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+                Guardando...
+              } @else {
+                Guardar horario
+              }
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (formularioExcepcionAbierto()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4" role="presentation">
+      <section class="flex max-h-[90dvh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-xl" role="dialog" aria-modal="true" aria-labelledby="titulo-formulario-excepcion">
+        <div class="flex shrink-0 items-start justify-between gap-4 border-b border-gray-100 px-5 py-5 sm:px-6">
+          <div>
+            <h2 id="titulo-formulario-excepcion" class="text-lg font-bold text-[#173a8d]">{{ formularioExcepcion().id === null ? 'Agregar excepción' : 'Editar excepción' }}</h2>
+            <p class="mt-1 text-sm text-gray-500">{{ formularioExcepcion().id === null ? 'Registra un cambio puntual en tu disponibilidad.' : 'Solo puedes modificar el tipo y el motivo.' }}</p>
+          </div>
+          <button type="button" (click)="cerrarFormularioExcepcion()" [disabled]="guardandoExcepcion()" class="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 disabled:opacity-60" aria-label="Cerrar formulario">
+            <svg lucideX class="h-5 w-5" aria-hidden="true"></svg>
+          </button>
+        </div>
+
+        <form (ngSubmit)="guardarExcepcion()" class="flex min-h-0 flex-1 flex-col">
+          <div class="min-h-0 flex-1 space-y-5 overflow-y-auto p-6">
+            @if (error()) {
+              <div class="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm text-rose-700" role="alert">
+                <svg lucideCircleAlert class="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true"></svg>
+                <p>{{ error() }}</p>
+              </div>
+            }
+
+          @if (formularioExcepcion().id === null) {
+            <div>
+              <label for="fecha-excepcion" class="mb-1.5 block text-sm font-bold text-gray-700">Fecha</label>
+              <input id="fecha-excepcion" type="date" [ngModel]="formularioExcepcion().fecha" (ngModelChange)="actualizarCampoExcepcion('fecha', $event)" name="fechaExcepcion" required class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#2852c7] focus:ring-2 focus:ring-[#dbe5ff]" />
+            </div>
+          } @else {
+            <div class="rounded-xl bg-gray-50 px-3 py-3">
+              <p class="text-xs font-bold uppercase tracking-[0.08em] text-gray-400">Fecha y horario</p>
+              <p class="mt-1 text-sm font-semibold text-gray-700">{{ formatearFecha(formularioExcepcion().fecha) }} · {{ formularioExcepcion().todoElDia ? 'Todo el día' : formatearHora(formularioExcepcion().horaInicio) + ' — ' + formatearHora(formularioExcepcion().horaFin) }}</p>
+            </div>
+          }
+
+          <div>
+            <label for="tipo-excepcion" class="mb-1.5 block text-sm font-bold text-gray-700">Tipo</label>
+            <select id="tipo-excepcion" [ngModel]="formularioExcepcion().tipo" (ngModelChange)="cambiarTipoExcepcion($event)" name="tipoExcepcion" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#2852c7] focus:ring-2 focus:ring-[#dbe5ff]">
+              <option value="NO_DISPONIBLE">No disponible</option>
+              <option value="HORARIO_ESPECIAL">Horario especial</option>
+            </select>
+          </div>
+
+          @if (formularioExcepcion().id === null) {
+            @if (formularioExcepcion().tipo === 'NO_DISPONIBLE') {
+              <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-700">
+                <input type="checkbox" [checked]="formularioExcepcion().todoElDia" (change)="cambiarTodoElDia($any($event.target).checked)" class="h-4 w-4 rounded border-gray-300 text-[#2852c7] focus:ring-[#2852c7]" />
+                <span class="font-semibold">Todo el día</span>
+              </label>
+            }
+
+            @if (!formularioExcepcion().todoElDia) {
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label for="hora-inicio-excepcion" class="mb-1.5 block text-sm font-bold text-gray-700">Hora inicio</label>
+                  <input id="hora-inicio-excepcion" type="time" [ngModel]="formularioExcepcion().horaInicio" (ngModelChange)="actualizarCampoExcepcion('horaInicio', $event)" name="horaInicioExcepcion" required class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#2852c7] focus:ring-2 focus:ring-[#dbe5ff]" />
+                </div>
+                <div>
+                  <label for="hora-fin-excepcion" class="mb-1.5 block text-sm font-bold text-gray-700">Hora fin</label>
+                  <input id="hora-fin-excepcion" type="time" [ngModel]="formularioExcepcion().horaFin" (ngModelChange)="actualizarCampoExcepcion('horaFin', $event)" name="horaFinExcepcion" required class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#2852c7] focus:ring-2 focus:ring-[#dbe5ff]" />
+                </div>
+              </div>
+            }
+          }
+
+          <div>
+            <label for="motivo-excepcion" class="mb-1.5 block text-sm font-bold text-gray-700">Motivo <span class="font-normal text-gray-400">(opcional)</span></label>
+            <textarea id="motivo-excepcion" rows="3" [ngModel]="formularioExcepcion().motivo" (ngModelChange)="actualizarCampoExcepcion('motivo', $event)" name="motivoExcepcion" class="w-full resize-y rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#2852c7] focus:ring-2 focus:ring-[#dbe5ff]"></textarea>
+          </div>
+
+          </div>
+
+          <div class="flex shrink-0 justify-end gap-3 border-t border-gray-100 p-4">
+            <button type="button" (click)="cerrarFormularioExcepcion()" [disabled]="guardandoExcepcion()" class="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60">Cancelar</button>
+            <button type="submit" [disabled]="guardandoExcepcion()" class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2852c7] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#1f45af] disabled:cursor-not-allowed disabled:opacity-60">
+              @if (guardandoExcepcion()) {
+                <svg lucideLoaderCircle class="h-4 w-4 animate-spin" aria-hidden="true"></svg>
+                Guardando...
+              } @else {
+                Guardar excepción
+              }
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  <app-confirm-modal
+    [open]="excepcionSeleccionadaEliminar() !== null"
+    title="Eliminar excepción"
+    message="¿Deseas eliminar esta excepción de horario? Esta acción no se puede deshacer."
+    confirmText="Eliminar"
+    cancelText="Cancelar"
+    variant="danger"
+    (confirmed)="confirmarEliminacionExcepcion()"
+    (cancelled)="cancelarEliminacionExcepcion()"
+  />
+</main>

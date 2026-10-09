@@ -1,0 +1,185 @@
+<header
+  class="flex min-h-[72px] min-w-0 items-center gap-3 border-b border-gray-100 bg-white px-4 shadow-sm sm:px-6 lg:px-8"
+>
+  <!-- LOGO EN MÓVIL -->
+  <a
+    [routerLink]="rutaInicio()"
+    class="flex min-w-0 items-center gap-2 font-bold text-[#203f91] lg:hidden"
+    aria-label="BarberApp, inicio"
+  >
+    <img src="/favicon.png" alt="" class="h-8 w-8 shrink-0 object-contain" />
+
+    <span class="truncate"> BarberApp </span>
+  </a>
+
+  <div class="ml-auto flex shrink-0 items-center gap-2">
+    <!-- CAMPANA DE NOTIFICACIONES -->
+    <div class="relative">
+      <button
+        type="button"
+        (click)="alternarNotificaciones()"
+        class="relative flex h-12 w-12 items-center justify-center rounded-xl bg-gray-50 text-[#203f91] transition hover:bg-gray-100"
+        aria-label="Notificaciones"
+        [attr.aria-expanded]="mostrarNotificaciones()"
+      >
+        <svg lucideBell class="h-5 w-5" aria-hidden="true"></svg>
+
+        <!-- CONTADOR -->
+        @if (cantidadPendientes() > 0) {
+          <span
+            class="absolute right-1 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-bold text-white"
+          >
+            {{ cantidadPendientes() > 99 ? '99+' : cantidadPendientes() }}
+          </span>
+        }
+      </button>
+
+      <!-- PANEL DE NOTIFICACIONES -->
+      @if (mostrarNotificaciones()) {
+        <div
+          class="absolute right-0 z-50 mt-3 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl"
+        >
+          <!-- CABECERA -->
+          <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+            <div>
+              <h3 class="text-sm font-bold text-gray-800">Notificaciones</h3>
+
+              <p class="text-xs text-gray-500">
+                @if (cantidadPendientes() === 0) {
+                  No tienes pendientes
+                } @else {
+                  {{ cantidadPendientes() }} pendientes
+                }
+              </p>
+            </div>
+
+            <div class="flex items-center gap-1">
+              @if (cantidadPendientes() > 0) {
+                <button
+                  type="button"
+                  (click)="marcarTodasComoLeidas()"
+                  class="rounded-lg px-2 py-1 text-xs font-semibold text-[#2852c7] transition hover:bg-blue-50"
+                >
+                  Marcar todas como leídas
+                </button>
+              }
+
+              <button
+                type="button"
+                (click)="cerrarNotificaciones()"
+                class="rounded-lg px-2 py-1 text-xs font-semibold text-gray-500 transition hover:bg-gray-100"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+
+          <!-- LISTA DE NOTIFICACIONES -->
+          <div class="max-h-[420px] overflow-y-auto">
+            @if (notificaciones().length === 0) {
+              <!-- SIN NOTIFICACIONES -->
+
+              <div class="px-5 py-10 text-center">
+                <svg lucideBell class="mx-auto mb-3 h-9 w-9 text-gray-300" aria-hidden="true"></svg>
+
+                <p class="text-sm font-semibold text-gray-600">No tienes notificaciones</p>
+
+                <p class="mt-1 text-xs text-gray-400">
+                  Aquí aparecerán las novedades de tus citas.
+                </p>
+              </div>
+            } @else {
+              <!-- NOTIFICACIONES -->
+
+              @for (notificacion of notificaciones(); track notificacion.id) {
+                <button
+                  type="button"
+                  (click)="abrirNotificacion(notificacion)"
+                  class="flex w-full gap-3 border-b border-gray-100 px-4 py-4 text-left transition hover:bg-gray-50"
+                  [class.bg-blue-50]="notificacion.estado === 'pendiente'"
+                >
+                  <!-- ICONO -->
+
+                  <div
+                    class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                    [class.bg-blue-100]="notificacion.estado === 'pendiente'"
+                    [class.bg-gray-100]="notificacion.estado === 'leida'"
+                  >
+                    <svg
+                      lucideBell
+                      class="h-4 w-4"
+                      [class.text-blue-600]="notificacion.estado === 'pendiente'"
+                      [class.text-gray-400]="notificacion.estado === 'leida'"
+                      aria-hidden="true"
+                    ></svg>
+                  </div>
+
+                  <!-- INFORMACIÓN -->
+
+                  <div class="min-w-0 flex-1">
+                    <p
+                      class="text-sm leading-5"
+                      [class.font-semibold]="notificacion.estado === 'pendiente'"
+                      [class.text-gray-800]="notificacion.estado === 'pendiente'"
+                      [class.text-gray-600]="notificacion.estado === 'leida'"
+                    >
+                      {{ notificacion.mensaje }}
+                    </p>
+
+                    <p class="mt-1 text-xs text-gray-400">
+                      {{ formatearFecha(notificacion.fechaEnvio) }}
+                    </p>
+                  </div>
+
+                  <!-- PUNTO DE NO LEÍDA -->
+
+                  @if (notificacion.estado === 'pendiente') {
+                    <span
+                      class="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600"
+                      aria-label="No leída"
+                    ></span>
+                  }
+                </button>
+              }
+            }
+          </div>
+
+          @if (notificaciones().length >= 20) {
+            <p class="border-t border-gray-100 px-4 py-2 text-center text-xs text-gray-400">
+              Se muestran las 20 más recientes
+            </p>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- PERFIL -->
+    <a
+      [routerLink]="rutaPerfil()"
+      routerLinkActive="bg-blue-50"
+      class="flex shrink-0 items-center gap-2 rounded-xl bg-gray-50 px-2 py-2 text-sm font-semibold text-[#203f91] transition hover:bg-gray-100 sm:px-3"
+      [attr.aria-label]="'Mi perfil, ' + (usuario()?.nombre ?? '')"
+    >
+      <span
+        class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-[#2563eb]"
+      >
+        {{ iniciales() }}
+      </span>
+
+      <span class="hidden max-w-32 truncate sm:block">
+        {{ primerNombre() }}
+      </span>
+    </a>
+
+    <!-- CERRAR SESIÓN -->
+    <button
+      type="button"
+      (click)="cerrarSesion()"
+      class="flex items-center gap-2 rounded-xl bg-[#e32929] px-3 py-3 text-sm font-bold text-white shadow-sm transition duration-200 hover:bg-[#c92121] sm:px-4"
+    >
+      <svg lucideLogOut class="h-5 w-5" aria-hidden="true"></svg>
+
+      <span> Cerrar sesión </span>
+    </button>
+  </div>
+</header>

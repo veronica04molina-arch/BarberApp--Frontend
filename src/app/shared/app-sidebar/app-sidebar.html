@@ -1,0 +1,29 @@
+<aside class="fixed inset-y-0 left-0 z-40 hidden w-[272px] flex-col bg-white shadow-xl lg:flex">
+  <a
+    [routerLink]="menu()[0]?.ruta"
+    class="flex h-[72px] items-center gap-3 border-b border-gray-100 px-6"
+    aria-label="BarberApp, inicio"
+  >
+    <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1f3fbf]">
+      <img src="/favicon.png" alt="" class="h-6 w-6 object-contain" />
+    </span>
+    <span class="text-xl font-bold text-[#203f91]">BarberApp</span>
+  </a>
+
+  <nav class="flex flex-1 flex-col gap-2 px-4 py-8" aria-label="Navegación principal">
+    @for (item of menu(); track item.ruta) {
+      <a
+        [routerLink]="item.ruta"
+        routerLinkActive="bg-[#2852c7] text-white font-bold shadow-[0_6px_14px_rgba(37,82,199,0.25)]"
+        [routerLinkActiveOptions]="{ exact: true }"
+        ariaCurrentWhenActive="page"
+        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-gray-600 transition duration-200 hover:bg-gray-100 hover:text-[#2852c7]"
+      >
+        <svg [lucideIcon]="item.icono" class="h-5 w-5" aria-hidden="true"></svg>
+        {{ item.etiqueta }}
+      </a>
+    }
+  </nav>
+
+  <p class="border-t border-gray-100 px-6 py-5 text-xs text-gray-400">© 2026 BarberApp</p>
+</aside>

@@ -1,0 +1,602 @@
+<main class="min-h-dvh min-w-0 flex-1 bg-[#2344a8] px-4 py-8 sm:px-6 lg:px-8">
+  <div class="mx-auto min-w-0 max-w-[1100px]">
+    <!-- ENCABEZADO -->
+    <header
+      class="mb-6 min-w-0 rounded-[18px] bg-white px-5 py-6 shadow-[0_8px_25px_rgba(15,39,110,0.12)] sm:px-8 sm:py-7"
+    >
+      <h1 class="break-words text-2xl font-bold text-[#183b91] sm:text-[30px]">Mi perfil</h1>
+      <p class="mt-2 break-words text-sm text-[#48618f] sm:text-base">
+        Administra tu información personal y la seguridad de tu cuenta.
+      </p>
+    </header>
+
+    <div class="grid items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+      <!-- ===================== COLUMNA IZQUIERDA ===================== -->
+      <aside class="min-w-0 space-y-6 lg:sticky lg:top-6">
+        <!-- TARJETA DE USUARIO -->
+        <section
+          class="overflow-hidden rounded-[18px] border border-gray-100 bg-white shadow-[0_8px_25px_rgba(15,39,110,0.10)]"
+        >
+          <div class="relative h-28 bg-gradient-to-br from-[#183b91] via-[#2344a8] to-[#2b61dc]">
+            <div class="absolute -right-8 -top-16 h-44 w-44 rounded-full bg-white/10"></div>
+            <div class="absolute -bottom-20 left-6 h-40 w-40 rounded-full bg-white/5"></div>
+          </div>
+
+          <div class="px-6 pb-6">
+            <div class="-mt-11 flex justify-center">
+              <div
+                class="relative flex h-22 w-22 items-center justify-center rounded-2xl border-4 border-white bg-gradient-to-br from-[#2b61dc] to-[#23449e] text-2xl font-bold text-white shadow-[0_8px_18px_rgba(35,68,168,0.25)]"
+                style="height: 5.5rem; width: 5.5rem"
+              >
+                {{ iniciales() }}
+                <span
+                  class="absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-[3px] border-white bg-emerald-500"
+                  title="Usuario activo"
+                ></span>
+              </div>
+            </div>
+
+            <div class="mt-4 text-center">
+              <h2 class="truncate text-lg font-bold text-[#173a8d]">
+                {{ usuario()?.nombre }}
+              </h2>
+              <p class="mt-0.5 truncate text-sm text-gray-600">
+                {{ usuario()?.email }}
+              </p>
+
+              <span
+                class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/15"
+              >
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                Cuenta activa
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- AVISO DE SEGURIDAD -->
+        <section
+          class="flex gap-3 rounded-[18px] border border-gray-100 bg-white p-4 shadow-[0_8px_25px_rgba(15,39,110,0.10)]"
+        >
+          <div
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#2b61dc] to-[#23449e] text-white shadow-[0_8px_18px_rgba(35,68,168,0.25)]"
+          >
+            <svg
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 3 4 6v5c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-3Z" />
+              <path d="m9 12 2 2 4-4" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-bold text-[#173a8d]">Protege tu cuenta</p>
+            <p class="mt-1 text-xs leading-5 text-gray-600">
+              Nunca compartas tu contraseña. Si ves actividad que no reconoces, cámbiala de
+              inmediato.
+            </p>
+          </div>
+        </section>
+      </aside>
+
+      <!-- ===================== COLUMNA DERECHA ===================== -->
+      <div class="min-w-0 space-y-6">
+        <!-- INFORMACIÓN PERSONAL -->
+        <section
+          class="rounded-[18px] border border-gray-100 bg-white shadow-[0_8px_25px_rgba(15,39,110,0.10)]"
+        >
+          <div class="flex items-start gap-3 border-b border-gray-100 px-6 py-5">
+            <div
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2b61dc] to-[#23449e] text-white shadow-[0_8px_18px_rgba(35,68,168,0.25)]"
+            >
+              <svg
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" />
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <h3 class="text-lg font-bold text-[#173a8d]">Información personal</h3>
+              <p class="mt-0.5 text-sm text-gray-600">Estos son los datos asociados a tu cuenta.</p>
+            </div>
+          </div>
+
+          <div class="grid gap-6 px-6 py-6 md:grid-cols-2">
+            <!-- NOMBRE -->
+            <div class="min-w-0">
+              <label for="nombre" class="mb-2 block text-sm font-semibold text-[#48618f]">
+                Nombre completo
+              </label>
+              <div class="relative">
+                <input
+                  id="nombre"
+                  type="text"
+                  [value]="usuario()?.nombre || ''"
+                  disabled
+                  class="h-11 w-full cursor-not-allowed rounded-xl border border-gray-200 bg-[#f1f2f5] px-4 pr-11 text-sm text-gray-500 outline-none"
+                />
+                <svg
+                  class="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="4" y="11" width="16" height="10" rx="2" />
+                  <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                </svg>
+              </div>
+              <p class="mt-1.5 text-xs text-gray-400">
+                El nombre no se puede modificar desde este módulo.
+              </p>
+            </div>
+
+            <!-- CORREO -->
+            <div class="min-w-0">
+              <label for="email" class="mb-2 block text-sm font-semibold text-[#48618f]">
+                Correo electrónico
+              </label>
+              <div class="relative">
+                <input
+                  id="email"
+                  type="email"
+                  [value]="usuario()?.email || ''"
+                  disabled
+                  class="h-11 w-full cursor-not-allowed rounded-xl border border-gray-200 bg-[#f1f2f5] px-4 pr-11 text-sm text-gray-500 outline-none"
+                />
+                <svg
+                  class="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="4" y="11" width="16" height="10" rx="2" />
+                  <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                </svg>
+              </div>
+              <p class="mt-1.5 text-xs text-gray-400">Es el correo con el que inicias sesión.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SEGURIDAD -->
+        <section
+          class="rounded-[18px] border border-gray-100 bg-white shadow-[0_8px_25px_rgba(15,39,110,0.10)]"
+        >
+          <div class="flex items-start gap-3 border-b border-gray-100 px-6 py-5">
+            <div
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2b61dc] to-[#23449e] text-white shadow-[0_8px_18px_rgba(35,68,168,0.25)]"
+            >
+              <svg
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="8" cy="15" r="4" />
+                <path d="m11 12 8-8M16 7l3 3M14 9l2 2" />
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <h3 class="text-lg font-bold text-[#173a8d]">Contraseña</h3>
+              <p class="mt-0.5 text-sm text-gray-600">
+                Elige una contraseña nueva para proteger tu cuenta.
+              </p>
+            </div>
+          </div>
+
+          <div class="px-6 py-6">
+            <div class="grid gap-6 md:grid-cols-2">
+              <!-- NUEVA CONTRASEÑA -->
+              <div class="min-w-0">
+                <label for="password" class="mb-2 block text-sm font-semibold text-[#48618f]">
+                  Nueva contraseña
+                </label>
+                <div class="relative">
+                  <input
+                    id="password"
+                    [type]="mostrarPassword() ? 'text' : 'password'"
+                    [formControl]="passwordControl"
+                    placeholder="Ingresa una nueva contraseña"
+                    autocomplete="new-password"
+                    class="h-11 w-full rounded-xl border border-gray-200 bg-[#f1f2f5] px-4 pr-12 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-[#2563eb] focus:bg-white focus:ring-4 focus:ring-[#2563eb]/10"
+                  />
+                  <button
+                    type="button"
+                    (click)="mostrarPassword.set(!mostrarPassword())"
+                    [attr.aria-label]="
+                      mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                    "
+                    class="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-gray-400 transition hover:bg-white hover:text-[#2563eb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb]"
+                  >
+                    @if (mostrarPassword()) {
+                      <svg
+                        class="h-4.5 w-4.5"
+                        style="height: 1.125rem; width: 1.125rem"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M3 3l18 18" />
+                        <path
+                          d="M10.6 6.1A9.8 9.8 0 0 1 12 6c5 0 8.5 4 9.5 6a14 14 0 0 1-3 3.8M6.4 6.9C4.3 8.3 2.9 10.4 2.5 12c1 2 4.5 6 9.5 6 1.3 0 2.5-.3 3.6-.8"
+                        />
+                        <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                      </svg>
+                    } @else {
+                      <svg
+                        style="height: 1.125rem; width: 1.125rem"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M2.5 12C3.5 10 7 6 12 6s8.5 4 9.5 6c-1 2-4.5 6-9.5 6s-8.5-4-9.5-6Z"
+                        />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    }
+                  </button>
+                </div>
+                <p class="mt-1.5 text-xs text-gray-400">Mínimo 8 caracteres.</p>
+              </div>
+
+              <!-- CONFIRMAR CONTRASEÑA -->
+              <div class="min-w-0">
+                <label
+                  for="confirmPassword"
+                  class="mb-2 block text-sm font-semibold text-[#48618f]"
+                >
+                  Confirmar contraseña
+                </label>
+                <div class="relative">
+                  <input
+                    id="confirmPassword"
+                    [type]="mostrarConfirmPassword() ? 'text' : 'password'"
+                    [formControl]="confirmPasswordControl"
+                    placeholder="Repite la nueva contraseña"
+                    autocomplete="new-password"
+                    [class]="
+                      confirmPasswordControl.touched &&
+                      passwordControl.value &&
+                      confirmPasswordControl.value &&
+                      passwordControl.value !== confirmPasswordControl.value
+                        ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-500/10'
+                        : 'border-gray-200 focus:border-[#2563eb] focus:ring-[#2563eb]/10'
+                    "
+                    class="h-11 w-full rounded-xl border bg-[#f1f2f5] px-4 pr-12 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:bg-white focus:ring-4"
+                  />
+                  <button
+                    type="button"
+                    (click)="mostrarConfirmPassword.set(!mostrarConfirmPassword())"
+                    [attr.aria-label]="
+                      mostrarConfirmPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                    "
+                    class="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-gray-400 transition hover:bg-white hover:text-[#2563eb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb]"
+                  >
+                    @if (mostrarConfirmPassword()) {
+                      <svg
+                        style="height: 1.125rem; width: 1.125rem"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M3 3l18 18" />
+                        <path
+                          d="M10.6 6.1A9.8 9.8 0 0 1 12 6c5 0 8.5 4 9.5 6a14 14 0 0 1-3 3.8M6.4 6.9C4.3 8.3 2.9 10.4 2.5 12c1 2 4.5 6 9.5 6 1.3 0 2.5-.3 3.6-.8"
+                        />
+                        <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                      </svg>
+                    } @else {
+                      <svg
+                        style="height: 1.125rem; width: 1.125rem"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M2.5 12C3.5 10 7 6 12 6s8.5 4 9.5 6c-1 2-4.5 6-9.5 6s-8.5-4-9.5-6Z"
+                        />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    }
+                  </button>
+                </div>
+                @if (
+                  confirmPasswordControl.touched &&
+                  passwordControl.value &&
+                  confirmPasswordControl.value &&
+                  passwordControl.value !== confirmPasswordControl.value
+                ) {
+                  <p class="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-rose-600">
+                    <svg
+                      class="h-3.5 w-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 8v5M12 16.5v.01" />
+                    </svg>
+                    Las contraseñas no coinciden.
+                  </p>
+                }
+              </div>
+            </div>
+
+            <!-- REQUISITOS DE CONTRASEÑA -->
+            @if (passwordControl.value) {
+              <div class="mt-6 rounded-xl bg-[#f1f2f5] p-4">
+                <p class="text-xs font-bold text-[#173a8d]">Tu contraseña debería tener</p>
+                <ul class="mt-3 grid gap-2.5 sm:grid-cols-2">
+                  <li
+                    class="flex items-center gap-2.5 text-xs"
+                    [class]="
+                      passwordControl.value.length >= 8
+                        ? 'font-semibold text-gray-800'
+                        : 'text-gray-500'
+                    "
+                  >
+                    <span
+                      class="flex h-4.5 w-4.5 items-center justify-center rounded-full transition"
+                      style="height: 1.125rem; width: 1.125rem"
+                      [class]="
+                        passwordControl.value.length >= 8
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-gray-200 text-transparent'
+                      "
+                    >
+                      <svg
+                        class="h-3 w-3"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="m5 12 5 5 9-10" />
+                      </svg>
+                    </span>
+                    Mínimo 8 caracteres
+                  </li>
+
+                  <li
+                    class="flex items-center gap-2.5 text-xs"
+                    [class]="
+                      /[A-Z]/.test(passwordControl.value)
+                        ? 'font-semibold text-gray-800'
+                        : 'text-gray-500'
+                    "
+                  >
+                    <span
+                      class="flex items-center justify-center rounded-full transition"
+                      style="height: 1.125rem; width: 1.125rem"
+                      [class]="
+                        /[A-Z]/.test(passwordControl.value)
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-gray-200 text-transparent'
+                      "
+                    >
+                      <svg
+                        class="h-3 w-3"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="m5 12 5 5 9-10" />
+                      </svg>
+                    </span>
+                    Una letra mayúscula
+                  </li>
+
+                  <li
+                    class="flex items-center gap-2.5 text-xs"
+                    [class]="
+                      /[0-9]/.test(passwordControl.value)
+                        ? 'font-semibold text-gray-800'
+                        : 'text-gray-500'
+                    "
+                  >
+                    <span
+                      class="flex items-center justify-center rounded-full transition"
+                      style="height: 1.125rem; width: 1.125rem"
+                      [class]="
+                        /[0-9]/.test(passwordControl.value)
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-gray-200 text-transparent'
+                      "
+                    >
+                      <svg
+                        class="h-3 w-3"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="m5 12 5 5 9-10" />
+                      </svg>
+                    </span>
+                    Un número
+                  </li>
+
+                  <li
+                    class="flex items-center gap-2.5 text-xs"
+                    [class]="
+                      /[^A-Za-z0-9]/.test(passwordControl.value)
+                        ? 'font-semibold text-gray-800'
+                        : 'text-gray-500'
+                    "
+                  >
+                    <span
+                      class="flex items-center justify-center rounded-full transition"
+                      style="height: 1.125rem; width: 1.125rem"
+                      [class]="
+                        /[^A-Za-z0-9]/.test(passwordControl.value)
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-gray-200 text-transparent'
+                      "
+                    >
+                      <svg
+                        class="h-3 w-3"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="m5 12 5 5 9-10" />
+                      </svg>
+                    </span>
+                    Un carácter especial
+                  </li>
+                </ul>
+              </div>
+            }
+          </div>
+
+          <!-- MENSAJES DE ESTADO -->
+          @if (mensajeExito()) {
+            <div
+              role="status"
+              class="mx-6 mb-6 flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+            >
+              <svg
+                class="mt-0.5 h-4 w-4 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m5 12 5 5 9-10" />
+              </svg>
+              {{ mensajeExito() }}
+            </div>
+          }
+          @if (mensajeError()) {
+            <div
+              role="alert"
+              class="mx-6 mb-6 flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700"
+            >
+              <svg
+                class="mt-0.5 h-4 w-4 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8v5M12 16.5v.01" />
+              </svg>
+              {{ mensajeError() }}
+            </div>
+          }
+
+          <!-- ACCIONES -->
+          <div
+            class="flex flex-col-reverse gap-3 rounded-b-[18px] border-t border-gray-100 bg-[#f1f2f5]/60 px-6 py-4 sm:flex-row sm:justify-end"
+          >
+            <button
+              type="button"
+              (click)="cancelarCambios()"
+              class="h-11 rounded-xl border border-gray-200 bg-white px-6 text-sm font-semibold text-[#23449e] transition hover:bg-[#f1f2f5] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563eb]/20"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              (click)="guardarCambios()"
+              [disabled]="guardando()"
+              class="btn-primary inline-flex h-11 w-auto items-center justify-center gap-2 px-7 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              @if (guardando()) {
+                <svg
+                  class="h-4 w-4 animate-spin"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    class="opacity-25"
+                  />
+                  <path
+                    d="M21 12a9 9 0 0 0-9-9"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                Guardando...
+              } @else {
+                Guardar cambios
+              }
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>

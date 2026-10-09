@@ -1,0 +1,329 @@
+<main class="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+  <div class="mx-auto max-w-[1240px]">
+    <a
+      routerLink="/cliente/servicios"
+      class="inline-flex items-center gap-2 rounded-lg text-sm font-semibold text-white transition hover:text-blue-100"
+    >
+      <svg lucideArrowLeft class="h-4 w-4" aria-hidden="true"></svg>Volver a servicios
+    </a>
+
+    <section
+      class="mt-5 flex flex-col gap-5 rounded-[22px] bg-white px-5 py-6 shadow-[0_10px_30px_rgba(15,39,110,0.14)] sm:flex-row sm:items-center sm:justify-between sm:px-8 sm:py-7"
+    >
+      <div class="flex items-center gap-3">
+        <span
+          class="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#2b61dc] to-[#23449e] text-white"
+          ><svg lucideCalendarDays class="h-6 w-6" aria-hidden="true"></svg
+        ></span>
+        <div class="min-w-0">
+          <h1 class="text-2xl font-bold text-[#183b91] sm:text-[30px]">Mis Citas</h1>
+          <p class="mt-1 text-sm text-[#48618f] sm:text-base">
+            Consulta y gestiona todas tus reservaciones
+          </p>
+        </div>
+      </div>
+      <a
+        routerLink="/cliente/servicios"
+        class="btn-primary inline-flex w-full shrink-0 items-center justify-center gap-2 sm:w-auto"
+        ><svg lucideCalendarDays class="h-4 w-4" aria-hidden="true"></svg>Nueva cita</a
+      >
+    </section>
+
+    @if (exito()) {
+      <app-alert-banner type="success" [message]="exito()!" (closed)="exito.set(null)" />
+    }
+    @if (error()) {
+      <app-alert-banner type="error" [message]="error()!" (closed)="error.set(null)" />
+    }
+
+    @if (cargando()) {
+      <section
+        class="mt-6 rounded-[18px] bg-white px-5 py-12 text-center shadow-[0_8px_25px_rgba(15,39,110,0.10)]"
+        role="status"
+      >
+        <svg
+          lucideLoaderCircle
+          class="mx-auto h-8 w-8 animate-spin text-[#2852c7]"
+          aria-hidden="true"
+        ></svg>
+        <p class="mt-3 text-sm font-semibold text-gray-600">Cargando tus citas...</p>
+        <p class="mt-1 text-xs text-gray-400">Estamos consultando la información más reciente.</p>
+      </section>
+    } @else if (error() && citas().length === 0) {
+      <section
+        class="mt-6 rounded-[18px] bg-white px-5 py-10 text-center shadow-[0_8px_25px_rgba(15,39,110,0.10)]"
+      >
+        <svg lucideCircleAlert class="mx-auto h-9 w-9 text-rose-500" aria-hidden="true"></svg>
+        <h2 class="mt-3 text-lg font-bold text-[#173a8d]">No pudimos cargar tus citas</h2>
+        <button type="button" (click)="cargarCitas()" class="btn-primary mt-5 w-auto">
+          Reintentar
+        </button>
+      </section>
+    } @else if (citas().length === 0) {
+      <section
+        class="mt-6 rounded-[22px] bg-white px-5 py-12 text-center shadow-[0_8px_25px_rgba(15,39,110,0.10)] sm:px-8"
+      >
+        <span
+          class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f3f6ff] text-[#2852c7]"
+          ><svg lucideCalendarDays class="h-7 w-7" aria-hidden="true"></svg
+        ></span>
+        <h2 class="mt-4 text-lg font-bold text-[#173a8d]">Aún no tienes citas</h2>
+        <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-gray-500">
+          Elige un servicio y reserva el horario que más te convenga.
+        </p>
+        <a
+          routerLink="/cliente/servicios"
+          class="btn-primary mt-5 inline-flex w-auto items-center justify-center"
+          >Nueva cita</a
+        >
+      </section>
+    } @else {
+      <section class="mt-7" aria-labelledby="proximas-citas">
+        <div class="mb-4 flex items-center gap-3">
+          <h2 id="proximas-citas" class="text-xl font-bold text-white">Próximas citas</h2>
+          <span class="rounded-full bg-white/20 px-2.5 py-1 text-xs font-bold text-white">{{
+            proximasCitas().length
+          }}</span>
+        </div>
+        @if (proximasCitas().length === 0) {
+          <div
+            class="rounded-[20px] border border-white/20 bg-white/10 px-5 py-8 text-center text-white"
+          >
+            <p class="font-semibold">No tienes próximas citas.</p>
+            <p class="mt-1 text-sm text-white/80">Cuando reserves una, aparecerá aquí.</p>
+          </div>
+        } @else {
+          <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            @for (cita of proximasCitas(); track cita.id) {
+              <ng-container
+                [ngTemplateOutlet]="tarjetaCita"
+                [ngTemplateOutletContext]="{ $implicit: cita }"
+              ></ng-container>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="mt-8" aria-labelledby="historial-citas">
+        <button
+          type="button"
+          (click)="historialAbierto.update(abierto => !abierto)"
+          class="flex w-full items-center gap-3 text-left"
+        >
+          <h2 id="historial-citas" class="text-xl font-bold text-white">Historial de citas</h2>
+          <span class="rounded-full bg-white/20 px-2.5 py-1 text-xs font-bold text-white">{{
+            historialCitas().length
+          }}</span
+          ><span
+            class="ml-auto flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-white transition"
+            [class.rotate-180]="historialAbierto()"
+            ><svg lucideChevronDown class="h-5 w-5" aria-hidden="true"></svg
+          ></span>
+        </button>
+        @if (historialAbierto()) {
+          @if (historialCitas().length === 0) {
+            <div
+              class="mt-4 rounded-[20px] border border-white/20 bg-white/10 px-5 py-8 text-center text-white"
+            >
+              <p class="font-semibold">Tu historial está vacío.</p>
+              <p class="mt-1 text-sm text-white/80">
+                Las citas pasadas aparecerán en esta sección.
+              </p>
+            </div>
+          } @else {
+            <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              @for (cita of historialCitas(); track cita.id) {
+                <ng-container
+                  [ngTemplateOutlet]="tarjetaCita"
+                  [ngTemplateOutletContext]="{ $implicit: cita }"
+                ></ng-container>
+              }
+            </div>
+          }
+        }
+      </section>
+    }
+  </div>
+</main>
+<footer
+  class="flex flex-col gap-2 bg-[#3658b3] px-4 py-5 text-center text-xs text-white/90 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:text-sm lg:px-8"
+>
+  <a href="mailto:barberapp.soporte@gmail.com" class="font-semibold hover:underline"
+    >barberapp.soporte@gmail.com</a
+  ><span>© 2026 BarberApp. Todos los derechos reservados.</span>
+</footer>
+
+<ng-template #tarjetaCita let-cita>
+  <article [id]="'cita-' + cita.id" [class]="clasesTarjeta(cita)">
+    @if (esCitaResaltada(cita)) {
+      <div
+        class="-mx-5 -mt-5 mb-4 rounded-t-[18px] bg-[#2563eb] px-5 py-2 text-xs font-bold tracking-[0.12em] text-white"
+      >
+        {{ esProximaCitaResaltada(cita) ? 'TU PRÓXIMA CITA' : 'CITA DE LA NOTIFICACIÓN' }}
+      </div>
+    }
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h3 class="break-words text-lg font-bold leading-snug text-[#173a8d]">
+          {{ cita.servicios.join(' + ') || 'Sin servicios registrados' }}
+        </h3>
+        <p class="mt-2 flex items-center gap-1.5 text-sm text-gray-500">
+          <svg lucideUser class="h-4 w-4 shrink-0 text-[#2563eb]" aria-hidden="true"></svg
+          ><span class="truncate">{{ cita.nombreBarbero }}</span>
+        </p>
+      </div>
+      <span
+        class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset"
+        [class]="clasesEstado(cita.estado)"
+        ><span class="h-2 w-2 rounded-full" [class]="puntoEstado(cita.estado)"></span
+        >{{ etiquetaEstado(cita.estado) }}</span
+      >
+    </div>
+    <div class="mt-5 grid grid-cols-2 gap-3 border-y border-gray-100 py-4">
+      <div class="rounded-xl bg-[#f4f7ff] p-3">
+        <p class="text-[10px] font-bold tracking-[0.1em] text-[#5270ac]">FECHA</p>
+        <p class="mt-1 text-sm font-bold capitalize leading-snug text-[#173a8d]">
+          {{ formatearFechaTarjeta(cita.fecha) }}
+        </p>
+      </div>
+      <div class="rounded-xl bg-[#f4f7ff] p-3">
+        <p class="text-[10px] font-bold tracking-[0.1em] text-[#5270ac]">HORA</p>
+        <p class="mt-1 text-sm font-bold text-[#173a8d]">{{ formatearHora(cita.hora) }}</p>
+      </div>
+    </div>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button
+        type="button"
+        (click)="verDetalles(cita)"
+        class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-bold text-gray-700 transition hover:border-[#cddaff] hover:bg-[#f5f8ff] hover:text-[#2852c7]"
+      >
+        <svg lucideEye class="h-4 w-4" aria-hidden="true"></svg>Ver detalles
+      </button>
+      @if (esPendiente(cita)) {
+        <button
+          type="button"
+          (click)="editarCita(cita)"
+          class="inline-flex items-center justify-center gap-2 rounded-xl border border-[#b8c9f5] bg-blue-50 px-3 py-2.5 text-sm font-bold text-[#2148b6] transition hover:bg-blue-100"
+          aria-label="Editar cita"
+        >
+          <svg lucidePencil class="h-4 w-4" aria-hidden="true"></svg>Editar</button
+        ><button
+          type="button"
+          (click)="solicitarCancelacion(cita)"
+          [disabled]="cancelandoId() !== null"
+          class="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-3 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <svg lucideTrash2 class="h-4 w-4" aria-hidden="true"></svg>Cancelar
+        </button>
+      }
+    </div>
+  </article>
+</ng-template>
+
+@if (citaSeleccionada(); as cita) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#0f276e]/45 px-4 py-6 backdrop-blur-[2px]"
+    role="presentation"
+    (click)="cerrarDetalles()"
+  >
+    <section
+      class="w-full max-w-lg rounded-[20px] bg-white shadow-2xl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titulo-detalle-cita"
+      (click)="$event.stopPropagation()"
+    >
+      <div
+        class="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-5 sm:px-6"
+      >
+        <div class="min-w-0">
+          <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#5270ac]">
+            Detalle de la cita
+          </p>
+          <h2 id="titulo-detalle-cita" class="mt-1 text-xl font-bold text-[#173a8d]">
+            {{ formatearFecha(cita.fecha) }}
+          </h2>
+        </div>
+        <button
+          type="button"
+          (click)="cerrarDetalles()"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+          aria-label="Cerrar detalles"
+        >
+          <svg lucideX class="h-5 w-5" aria-hidden="true"></svg>
+        </button>
+      </div>
+      <div class="space-y-5 px-5 py-5 sm:px-6">
+        <div>
+          <p class="text-xs font-bold text-gray-400">Estado</p>
+          <span
+            class="mt-2 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold ring-1 ring-inset"
+            [class]="clasesEstado(cita.estado)"
+            >{{ etiquetaEstado(cita.estado) }}</span
+          >
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl bg-gray-50 p-4">
+            <p class="text-xs font-bold text-gray-400">Fecha</p>
+            <p class="mt-2 text-sm font-bold capitalize text-gray-700">
+              {{ formatearFecha(cita.fecha) }}
+            </p>
+          </div>
+          <div class="rounded-2xl bg-gray-50 p-4">
+            <p class="text-xs font-bold text-gray-400">Hora</p>
+            <p class="mt-2 text-sm font-bold text-gray-700">{{ formatearHora(cita.hora) }}</p>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-bold text-gray-400">Barbero</p>
+          <p class="mt-2 text-sm font-semibold text-gray-700">{{ cita.nombreBarbero }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-bold text-gray-400">Servicios</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            @for (servicio of cita.servicios; track servicio) {
+              <span
+                class="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#2852c7]"
+                >{{ servicio }}</span
+              >
+            } @empty {
+              <p class="text-sm text-gray-500">Sin servicios registrados.</p>
+            }
+          </div>
+        </div>
+        @if (cita.notas) {
+          <div>
+            <p class="text-xs font-bold text-gray-400">Notas</p>
+            <p class="mt-2 rounded-xl bg-gray-50 p-4 text-sm leading-relaxed text-gray-700">
+              {{ cita.notas }}
+            </p>
+          </div>
+        }
+      </div>
+      <div class="flex justify-end border-t border-gray-100 px-5 py-4 sm:px-6">
+        <button
+          type="button"
+          (click)="cerrarDetalles()"
+          class="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-50"
+        >
+          Cerrar
+        </button>
+      </div>
+    </section>
+  </div>
+}
+
+<app-confirm-modal
+  [open]="!!citaACancelar()"
+  title="Cancelar cita"
+  [message]="
+    '¿Deseas cancelar tu cita del ' +
+    (citaACancelar() ? formatearFecha(citaACancelar()!.fecha) : '') +
+    '?'
+  "
+  confirmText="Sí, cancelar cita"
+  cancelText="Conservar cita"
+  variant="danger"
+  (confirmed)="cancelarCita()"
+  (cancelled)="cerrarCancelacion()"
+/>

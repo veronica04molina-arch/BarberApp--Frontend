@@ -1,0 +1,102 @@
+<main class="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+  <div class="mx-auto max-w-[1100px]">
+    <section class="rounded-[18px] bg-white px-5 py-6 shadow-[0_8px_25px_rgba(15,39,110,0.12)] sm:px-8 sm:py-7">
+      <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#5270ac]">Panel del barbero</p>
+      <h1 class="mt-1 break-words text-2xl font-bold text-[#183b91] sm:text-[30px]">
+        Bienvenido, {{ primerNombre() }}
+      </h1>
+      <p class="mt-2 max-w-2xl break-words text-sm leading-relaxed text-[#48618f] sm:text-base">
+        Desde aquí puedes consultar tus citas, revisar tu agenda y administrar tus servicios.
+      </p>
+    </section>
+
+    @if (error()) {
+      <app-alert-banner type="error" [message]="error()!" (closed)="error.set(null)" />
+    }
+
+    <section class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Resumen">
+      <article class="rounded-[18px] bg-white p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)]">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-[#2563eb]">
+          <svg lucideCalendarDays class="h-5 w-5" aria-hidden="true"></svg>
+        </div>
+        <p class="mt-4 text-sm font-semibold text-gray-500">Citas de hoy</p>
+        <p class="mt-1 text-3xl font-bold text-[#173a8d]">{{ citasHoy() }}</p>
+      </article>
+
+      <article class="rounded-[18px] bg-white p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)]">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+          <svg lucideHourglass class="h-5 w-5" aria-hidden="true"></svg>
+        </div>
+        <p class="mt-4 text-sm font-semibold text-gray-500">Pendientes</p>
+        <p class="mt-1 text-3xl font-bold text-[#173a8d]">{{ citasPendientes() }}</p>
+      </article>
+
+      <article class="rounded-[18px] bg-white p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)]">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-green-50 text-green-600">
+          <svg lucideCircleCheckBig class="h-5 w-5" aria-hidden="true"></svg>
+        </div>
+        <p class="mt-4 text-sm font-semibold text-gray-500">Confirmadas</p>
+        <p class="mt-1 text-3xl font-bold text-[#173a8d]">{{ citasConfirmadas() }}</p>
+      </article>
+
+      <article class="rounded-[18px] bg-white p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)]">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+          <svg lucideCheckCheck class="h-5 w-5" aria-hidden="true"></svg>
+        </div>
+        <p class="mt-4 text-sm font-semibold text-gray-500">Completadas</p>
+        <p class="mt-1 text-3xl font-bold text-[#173a8d]">{{ citasCompletadas() }}</p>
+      </article>
+    </section>
+
+    <section class="mt-6 min-w-0 rounded-[18px] bg-white p-5 shadow-[0_8px_25px_rgba(15,39,110,0.10)] sm:p-6" aria-label="Agenda">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#5270ac]">Agenda</p>
+          <h2 class="mt-1 text-xl font-bold text-[#173a8d]">Citas de hoy</h2>
+        </div>
+        <a routerLink="/barbero/agenda" class="inline-flex items-center gap-1.5 text-sm font-bold text-[#2852c7] hover:underline">
+          Ver agenda
+          <svg lucideArrowRight class="h-4 w-4" aria-hidden="true"></svg>
+        </a>
+      </div>
+
+      @if (cargando()) {
+        <div class="flex flex-col items-center px-4 py-10 text-center">
+          <svg lucideLoaderCircle class="h-8 w-8 animate-spin text-[#2852c7]" aria-hidden="true"></svg>
+          <p class="mt-3 text-sm font-semibold text-gray-600">Cargando citas de hoy...</p>
+        </div>
+      } @else if (hayCitasDeHoy()) {
+        <ul class="mt-5 space-y-3">
+          @for (cita of citasDeHoy(); track cita.id) {
+            <li class="flex flex-wrap items-center gap-3 rounded-xl bg-gray-50 px-4 py-4 sm:flex-nowrap sm:gap-4">
+              <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563eb]">
+                <svg lucideCalendarCheck class="h-5 w-5" aria-hidden="true"></svg>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold text-gray-800">{{ cita.cliente ?? 'Cliente no disponible' }}</p>
+                <p class="truncate text-xs text-gray-500">
+                  {{ cita.servicios.length ? cita.servicios.join(', ') : 'Sin servicios registrados' }}
+                </p>
+              </div>
+              <span class="rounded-full px-3 py-1 text-xs font-semibold" [class]="claseEstado(cita.estado)">
+                {{ etiquetaEstado(cita.estado) }}
+              </span>
+              <p class="ml-auto text-sm font-bold text-[#173a8d] sm:ml-0">{{ cita.hora.slice(0, 5) }}</p>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="mt-5 rounded-xl bg-gray-50 px-4 py-8 text-center">
+          <svg lucideCalendarDays class="mx-auto h-8 w-8 text-gray-300" aria-hidden="true"></svg>
+          <p class="mt-3 text-sm font-semibold text-gray-600">No tienes citas agendadas</p>
+          <p class="mt-1 text-xs text-gray-400">No hay citas programadas para hoy.</p>
+        </div>
+      }
+    </section>
+  </div>
+</main>
+
+<footer class="flex flex-col gap-2 bg-[#3658b3] px-4 py-5 text-center text-xs text-white/90 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:text-sm lg:px-8">
+  <a href="mailto:barberapp.soporte@gmail.com" class="font-semibold hover:underline">barberapp.soporte@gmail.com</a>
+  <span>© 2026 BarberApp. Todos los derechos reservados.</span>
+</footer>
