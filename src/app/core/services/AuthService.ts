@@ -5,7 +5,7 @@ import { Observable, tap } from 'rxjs';
 
 import { LoginRequest } from '../../models/login-request';
 import { LoginResponse } from '../../models/login-response';
-import { environment } from '../../../environments/environment.local';
+import { environment } from '../../../environments/environment';
 import { END_POINT_SERVICE } from '../../../environments/environment.variable';
 
 type UsuarioSesion = Pick<LoginResponse, 'id' | 'nombre' | 'email' | 'rol'>;
@@ -114,6 +114,10 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  cerrarSesionLocal(): void {
+    this.limpiarSesionLocal();
+  }
+
   estaAutenticado(): boolean {
     return !!localStorage.getItem('token');
   }
@@ -151,10 +155,7 @@ export class AuthService {
   // ==========================================
 
   cambiarPassword(datos: CambiarPasswordRequest): Observable<void> {
-    return this.http.put<void>(
-      `${this.loginUrl}/${END_POINT_SERVICE.PUT_CAMBIAR_PASSWORD}`,
-      datos,
-    );
+    return this.http.put<void>(`${this.loginUrl}/${END_POINT_SERVICE.PUT_CAMBIAR_PASSWORD}`, datos);
   }
 
   // ==========================================

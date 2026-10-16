@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { RestablecerPassword } from './restablecer-password';
 
@@ -8,7 +9,8 @@ describe('RestablecerPassword', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RestablecerPassword]
+      imports: [RestablecerPassword],
+      providers: [provideRouter([])],
     })
     .compileComponents();
 

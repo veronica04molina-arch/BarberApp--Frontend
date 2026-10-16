@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { Notificacion } from '../../models/notificacion';
 import { END_POINT_SERVICE } from '../../../environments/environment.variable';
-import { environment } from '../../../environments/environment.local';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',

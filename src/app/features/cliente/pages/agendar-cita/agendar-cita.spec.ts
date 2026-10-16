@@ -23,7 +23,7 @@ describe('AgendarCita', () => {
       id: 31,
       idUsuario: 4,
       idBarbero: 7,
-      fecha: '2026-10-08',
+      fecha: '2026-10-17',
       hora: '17:30',
       estado: 'pendiente',
       fechaCreacion: '2026-10-06T10:00:00',
@@ -77,7 +77,7 @@ describe('AgendarCita', () => {
   });
 
   it('uses PUT with the original appointment ID when saving an edit', () => {
-    component.fechaSeleccionada = '2026-10-09';
+    component.fechaSeleccionada = '2026-10-18';
     component.horaSeleccionada = '10:00';
     component.horariosDisponibles = ['10:00'];
 
@@ -89,7 +89,7 @@ describe('AgendarCita', () => {
         id: 31,
         idUsuario: 4,
         idBarbero: 7,
-        fecha: '2026-10-09',
+        fecha: '2026-10-18',
         hora: '10:00',
       }),
     );
@@ -102,6 +102,6 @@ describe('AgendarCita', () => {
   it('ignores the appointment being edited when it asks for available times', () => {
     component.seleccionarFecha();
 
-    expect(obtenerHorariosDisponibles).toHaveBeenCalledWith(7, '2026-10-08', 30, 31);
+    expect(obtenerHorariosDisponibles).toHaveBeenCalledWith(7, '2026-10-17', 30, 31);
   });
 });

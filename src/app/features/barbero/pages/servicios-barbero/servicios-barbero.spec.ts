@@ -1,8 +1,12 @@
+import { registerLocaleData } from '@angular/common';
+import localeEsCo from '@angular/common/locales/es-CO';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { ServiciosService } from '../../../../core/services/servicios.service';
 import { ServiciosBarbero } from './servicios-barbero';
+
+registerLocaleData(localeEsCo);
 
 describe('ServiciosBarbero', () => {
   let component: ServiciosBarbero;

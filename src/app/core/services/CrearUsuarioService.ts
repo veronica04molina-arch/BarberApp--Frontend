@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { Usuario, UsuarioRequest } from '../../models/usuario';
 import { LoginRequest } from '../../models/login-request';
-import { environment } from '../../../environments/environment.local';
+import { environment } from '../../../environments/environment';
 import { END_POINT_SERVICE } from '../../../environments/environment.variable';
 
 @Injectable({

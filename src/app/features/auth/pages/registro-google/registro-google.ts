@@ -11,7 +11,7 @@ import {
   LucideUser,
 } from '@lucide/angular';
 
-import { environment } from '../../../../../environments/environment.local';
+import { environment } from '../../../../../environments/environment';
 import { END_POINT_SERVICE } from '../../../../../environments/environment.variable';
 import { AuthService } from '../../../../core/services/AuthService';
 import { LoginResponse } from '../../../../models/login-response';

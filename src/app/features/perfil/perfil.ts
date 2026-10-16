@@ -3,6 +3,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 
 import { AuthService } from '../../core/services/AuthService';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-perfil',
@@ -14,14 +15,12 @@ import { AuthService } from '../../core/services/AuthService';
 })
 export class Perfil {
   readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly usuario = this.authService.usuario;
   readonly iniciales = this.authService.iniciales;
 
-  // ==========================================
   // CONTROLES EDITABLES
-  // ==========================================
-
   readonly passwordControl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.minLength(8)],
@@ -31,10 +30,7 @@ export class Perfil {
     nonNullable: true,
   });
 
-  // ==========================================
   // ESTADO
-  // ==========================================
-
   readonly mostrarPassword = signal(false);
   readonly mostrarConfirmPassword = signal(false);
   readonly guardando = signal(false);
@@ -42,10 +38,7 @@ export class Perfil {
   readonly mensajeExito = signal('');
   readonly mensajeError = signal('');
 
-  // ==========================================
   // GUARDAR CAMBIOS
-  // ==========================================
-
   guardarCambios(): void {
     this.mensajeExito.set('');
     this.mensajeError.set('');
@@ -78,6 +71,10 @@ export class Perfil {
         next: () => {
           this.mensajeExito.set('Tu contraseña se actualizó correctamente.');
           this.limpiarCamposPassword();
+
+          setTimeout(() => {
+            this.authService.cerrarSesionLocal();
+          }, 2000);
         },
 
         error: (error) => {
@@ -90,10 +87,7 @@ export class Perfil {
       });
   }
 
-  // ==========================================
   // CANCELAR
-  // ==========================================
-
   cancelarCambios(): void {
     this.mensajeExito.set('');
     this.mensajeError.set('');
@@ -101,10 +95,7 @@ export class Perfil {
     this.limpiarCamposPassword();
   }
 
-  // ==========================================
   // UTILIDADES
-  // ==========================================
-
   private limpiarCamposPassword(): void {
     this.passwordControl.reset();
     this.confirmPasswordControl.reset();

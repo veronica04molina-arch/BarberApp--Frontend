@@ -1,7 +1,7 @@
 import { Component, signal, AfterViewInit, ElementRef, ViewChild, inject } from '@angular/core';
 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment.local';
+import { environment } from '../../../../../environments/environment';
 import { END_POINT_SERVICE } from '../../../../../environments/environment.variable';
 
 import {
@@ -263,8 +263,6 @@ export class CrearUsuario implements AfterViewInit {
     const usuarioRequest: UsuarioRequest = {
       ...formValues,
     };
-
-    console.log('Enviando datos:', usuarioRequest);
 
     // Registrar usuario
     this.usuarioService.registrarUsuario(usuarioRequest).subscribe({

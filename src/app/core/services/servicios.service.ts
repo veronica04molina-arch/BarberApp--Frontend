@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment.local';
+import { environment } from '../../../environments/environment';
 import { Barbero, Servicio } from '../../models/servicio';
 import { END_POINT_SERVICE } from '../../../environments/environment.variable';
 
