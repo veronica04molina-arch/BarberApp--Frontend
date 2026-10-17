@@ -1,8 +1,8 @@
 <div class="min-h-dvh w-full bg-[#2344a8] font-body text-gray-800">
-  <app-sidebar />
+  <app-sidebar [menuAbierto]="menuAbierto()" (cerrarMenu)="cerrarMenu()" />
 
   <div class="flex min-h-dvh min-w-0 flex-col lg:pl-[272px]">
-    <app-header />
+    <app-header [menuAbierto]="menuAbierto()" (abrirMenu)="abrirMenu()" />
     <router-outlet />
   </div>
 </div>

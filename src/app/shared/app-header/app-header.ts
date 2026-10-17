@@ -1,6 +1,6 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
-import { LucideBell, LucideLogOut } from '@lucide/angular';
+import { LucideBell, LucideLogOut, LucideMenu } from '@lucide/angular';
 
 import { AuthService } from '../../core/services/AuthService';
 import { NotificacionService } from '../../core/services/NotificacionService';
@@ -12,7 +12,7 @@ import { interval } from 'rxjs';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, LucideBell, LucideLogOut],
+  imports: [RouterLink, RouterLinkActive, LucideBell, LucideLogOut, LucideMenu],
   templateUrl: './app-header.html',
   host: { class: 'block' },
 })
@@ -25,6 +25,8 @@ export class AppHeader {
   readonly primerNombre = this.authService.primerNombre;
   readonly iniciales = this.authService.iniciales;
   readonly rutaInicio = this.authService.rutaInicio;
+  readonly menuAbierto = input(false);
+  readonly abrirMenu = output<void>();
 
   // Ruta del perfil según el rol (barbero o cliente)
   readonly rutaPerfil = computed(() =>
