@@ -127,7 +127,9 @@ export class LoginComponent {
     this.authService.solicitarRecuperacionPassword(email).subscribe({
       next: () => {
         this.enviandoRecuperacion.set(false);
-        this.mensajeExitoModal.set('Hemos enviado las instrucciones a tu correo electrónico.');
+        this.mensajeExitoModal.set(
+          'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.',
+        );
       },
       error: (error: HttpErrorResponse) => {
         this.enviandoRecuperacion.set(false);
