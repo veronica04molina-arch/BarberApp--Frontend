@@ -9,6 +9,7 @@ import {
   BarberoCita,
   Cita,
   CitaCliente,
+  ElegibilidadCompletarCita,
   CitaRequest,
   CitaServicio,
   UsuarioCita,
@@ -138,6 +139,12 @@ export class CitasService {
       `${this.api}/${END_POINT_SERVICE.PUT_COMPLETAR_CITA}/${idCita}/completar`,
       null,
       { responseType: 'text' },
+    );
+  }
+
+  obtenerElegibilidadCompletar(idCita: number): Observable<ElegibilidadCompletarCita> {
+    return this.http.get<ElegibilidadCompletarCita>(
+      `${this.api}/${END_POINT_SERVICE.GET_CITA}/${idCita}/completar/elegibilidad`,
     );
   }
 }
