@@ -18,11 +18,6 @@ export interface Cita {
   notas: string | null;
 }
 
-export interface ElegibilidadCompletarCita {
-  puedeCompletar: boolean;
-  motivo: string | null;
-}
-
 export interface CitaCliente {
   id: number;
   fecha: string;

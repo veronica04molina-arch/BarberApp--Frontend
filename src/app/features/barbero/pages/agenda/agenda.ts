@@ -31,7 +31,7 @@ import { forkJoin, map, of, switchMap } from 'rxjs';
 
 import { AuthService } from '../../../../core/services/AuthService';
 import { CitasService } from '../../../../core/services/CitasService';
-import { Cita, ElegibilidadCompletarCita } from '../../../../models/cita';
+import { Cita } from '../../../../models/cita';
 
 type EstadoFiltro = 'todas' | 'pendiente' | 'confirmada' | 'completada' | 'cancelada';
 
@@ -43,7 +43,6 @@ interface FiltroAgenda {
 interface CitaAgenda extends Cita {
   nombreCliente: string | null;
   servicios: string[];
-  elegibilidadCompletar: ElegibilidadCompletarCita;
 }
 
 const FILTROS: readonly FiltroAgenda[] = [
@@ -142,11 +141,7 @@ export class Agenda implements OnInit {
   }
 
   puedeCompletar(cita: CitaAgenda): boolean {
-    return cita.elegibilidadCompletar.puedeCompletar;
-  }
-
-  motivoNoCompletar(cita: CitaAgenda): string | null {
-    return cita.elegibilidadCompletar.motivo;
+    return cita.estado !== 'cancelada' && cita.estado !== 'completada';
   }
 
   verDetalles(idCita: number): void {
@@ -186,31 +181,13 @@ export class Agenda implements OnInit {
       next: () => {
         this.citas.update((citas) =>
           citas.map((citaActual) =>
-            citaActual.id === cita.id
-              ? {
-                  ...citaActual,
-                  estado: 'completada',
-                  elegibilidadCompletar: {
-                    puedeCompletar: false,
-                    motivo: 'La cita ya se encuentra completada.',
-                  },
-                }
-              : citaActual,
+            citaActual.id === cita.id ? { ...citaActual, estado: 'completada' } : citaActual,
           ),
         );
 
         if (this.citaDetalle()?.id === cita.id) {
           this.citaDetalle.update((detalle) =>
-            detalle
-              ? {
-                  ...detalle,
-                  estado: 'completada',
-                  elegibilidadCompletar: {
-                    puedeCompletar: false,
-                    motivo: 'La cita ya se encuentra completada.',
-                  },
-                }
-              : null,
+            detalle ? { ...detalle, estado: 'completada' } : null,
           );
         }
 
@@ -313,16 +290,10 @@ export class Agenda implements OnInit {
     return forkJoin({
       cliente: this.citasService.obtenerUsuario(cita.idUsuario),
       relaciones: this.citasService.obtenerServiciosDeCita(cita.id),
-      elegibilidadCompletar: this.citasService.obtenerElegibilidadCompletar(cita.id),
     }).pipe(
-      switchMap(({ cliente, relaciones, elegibilidadCompletar }) => {
+      switchMap(({ cliente, relaciones }) => {
         if (relaciones.length === 0) {
-          return of({
-            ...cita,
-            nombreCliente: cliente?.nombre ?? null,
-            servicios: [],
-            elegibilidadCompletar,
-          });
+          return of({ ...cita, nombreCliente: cliente?.nombre ?? null, servicios: [] });
         }
 
         return forkJoin(
@@ -332,7 +303,6 @@ export class Agenda implements OnInit {
             ...cita,
             nombreCliente: cliente?.nombre ?? null,
             servicios: servicios.map((servicio) => servicio.nombre),
-            elegibilidadCompletar,
           })),
         );
       }),
