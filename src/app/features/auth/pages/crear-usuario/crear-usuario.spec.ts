@@ -22,4 +22,20 @@ describe('CrearUsuario', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('conserva los espacios inicial y final de la contrasena', () => {
+    const password = ' secreta ';
+    component.registroForm.controls['password'].setValue(password);
+
+    expect(component.registroForm.controls['password'].value).toBe(password);
+  });
+
+  it('acepta 20 caracteres y rechaza 21', () => {
+    const password = component.registroForm.controls['password'];
+    password.setValue('a'.repeat(20));
+    expect(password.hasError('maxlength')).toBeFalsy();
+
+    password.setValue('a'.repeat(21));
+    expect(password.hasError('maxlength')).toBeTruthy();
+  });
 });

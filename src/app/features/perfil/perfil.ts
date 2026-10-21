@@ -23,7 +23,7 @@ export class Perfil {
   // CONTROLES EDITABLES
   readonly passwordControl = new FormControl('', {
     nonNullable: true,
-    validators: [Validators.minLength(8)],
+    validators: [Validators.minLength(8), Validators.maxLength(20)],
   });
 
   readonly confirmPasswordControl = new FormControl('', {
@@ -55,6 +55,11 @@ export class Perfil {
     }
 
     if (password.length < 8) {
+      return;
+    }
+
+    if (password.length > 20) {
+      this.mensajeError.set('La contraseña no puede superar los 20 caracteres.');
       return;
     }
 

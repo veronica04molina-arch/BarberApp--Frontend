@@ -52,7 +52,7 @@ export class LoginComponent {
     this.errorGeneral.set('');
 
     const email = this.credenciales.email.trim();
-    const password = this.credenciales.password.trim();
+    const password = this.credenciales.password;
 
     if (!email) {
       this.errorCorreo.set('Ingresa tu correo electrónico.');
@@ -64,6 +64,8 @@ export class LoginComponent {
       this.errorPassword.set('Ingresa tu contraseña.');
     } else if (password.length < 6) {
       this.errorPassword.set('La contraseña debe tener al menos 6 caracteres.');
+    } else if (password.length > 20) {
+      this.errorPassword.set('La contraseña no puede superar los 20 caracteres.');
     }
 
     if (this.errorCorreo() || this.errorPassword()) {
@@ -71,7 +73,8 @@ export class LoginComponent {
     }
 
     this.credenciales.email = email;
-    this.credenciales.password = password;
+    // La contraseña se envía exactamente como se ingresó, sin recortarla ni
+    // modificarla, para que el backend autentique el mismo valor.
     this.iniciandoSesion.set(true);
 
     this.authService.iniciarSesion(this.credenciales).subscribe({
@@ -86,11 +89,29 @@ export class LoginComponent {
           }
         }, 1000);
       },
-      error: () => {
-        this.errorGeneral.set('Correo o contraseña incorrectos.');
+      error: (error: HttpErrorResponse) => {
+        this.errorGeneral.set(this.obtenerMensajeErrorLogin(error));
         this.iniciandoSesion.set(false);
       },
     });
+  }
+
+  private obtenerMensajeErrorLogin(error: HttpErrorResponse): string {
+    const respuesta = error.error;
+
+    if (typeof respuesta === 'string' && respuesta.trim()) {
+      return respuesta;
+    }
+
+    if (respuesta && typeof respuesta === 'object') {
+      const mensaje = respuesta.message ?? respuesta.error;
+
+      if (typeof mensaje === 'string' && mensaje.trim()) {
+        return mensaje;
+      }
+    }
+
+    return 'Correo o contraseña incorrectos.';
   }
 
   // METODOS DE RECUPERACIÓN DE CONTRASEÑA

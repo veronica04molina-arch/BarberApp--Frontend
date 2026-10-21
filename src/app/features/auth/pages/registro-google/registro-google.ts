@@ -60,7 +60,7 @@ export class RegistroGoogle {
       nombre: [{ value: this.nombre, disabled: true }],
       correo: [{ value: this.correo, disabled: true }],
       telefono: ['', [Validators.required, Validators.pattern(/^3\d{9}$/)]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(20)]],
       aceptaTerminos: [false, [Validators.requiredTrue]],
     });
   }

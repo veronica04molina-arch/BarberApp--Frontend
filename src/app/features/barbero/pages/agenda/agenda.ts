@@ -92,6 +92,7 @@ export class Agenda implements OnInit {
   readonly cargando = signal(false);
   readonly cargandoDetalle = signal(false);
   readonly completandoId = signal<number | null>(null);
+  readonly errorCompletarPorCita = signal<Record<number, string>>({});
   readonly error = signal<string | null>(null);
   readonly citaDetalle = signal<CitaAgenda | null>(null);
 
@@ -174,7 +175,7 @@ export class Agenda implements OnInit {
       return;
     }
 
-    this.error.set(null);
+    this.limpiarErrorCompletar(cita.id);
     this.completandoId.set(cita.id);
 
     this.citasService.completarCita(cita.id).subscribe({
@@ -194,10 +195,17 @@ export class Agenda implements OnInit {
         this.completandoId.set(null);
       },
       error: (error: HttpErrorResponse) => {
-        this.error.set(this.mensajeError(error, 'No fue posible completar la cita.'));
+        this.errorCompletarPorCita.update((errores) => ({
+          ...errores,
+          [cita.id]: this.mensajeError(error, 'No fue posible completar la cita.'),
+        }));
         this.completandoId.set(null);
       },
     });
+  }
+
+  mensajeErrorCompletar(idCita: number): string | null {
+    return this.errorCompletarPorCita()[idCita] ?? null;
   }
 
   etiquetaEstado(estado: string): string {
@@ -333,6 +341,13 @@ export class Agenda implements OnInit {
       this.mensajeError(error, 'No fue posible cargar las citas de la fecha seleccionada.'),
     );
     this.cargando.set(false);
+  }
+
+  private limpiarErrorCompletar(idCita: number): void {
+    this.errorCompletarPorCita.update((errores) => {
+      const { [idCita]: _, ...resto } = errores;
+      return resto;
+    });
   }
 
   private mensajeError(error: HttpErrorResponse, mensajePorDefecto: string): string {

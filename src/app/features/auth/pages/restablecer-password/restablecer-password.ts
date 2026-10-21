@@ -47,8 +47,8 @@ export class RestablecerPassword implements OnInit {
     this.errorGeneral.set('');
     this.mensajeExito.set('');
 
-    const password = this.nuevaPassword().trim();
-    const confirmacion = this.confirmarPassword().trim();
+    const password = this.nuevaPassword();
+    const confirmacion = this.confirmarPassword();
 
     if (!password) {
       this.errorGeneral.set('Ingresa la nueva contraseña.');
@@ -57,6 +57,11 @@ export class RestablecerPassword implements OnInit {
 
     if (password.length < 6) {
       this.errorGeneral.set('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
+    if (password.length > 20) {
+      this.errorGeneral.set('La contraseña no puede superar los 20 caracteres.');
       return;
     }
 

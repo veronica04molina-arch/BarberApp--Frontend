@@ -314,6 +314,12 @@
                     </button>
                   }
                 </div>
+
+                @if (mensajeErrorCompletar(cita.id); as mensajeErrorCompletar) {
+                  <p class="mt-2 text-xs text-red-600" role="alert">
+                    {{ mensajeErrorCompletar }}
+                  </p>
+                }
               </article>
             }
           </section>
@@ -484,6 +490,12 @@
             </div>
           }
         </div>
+
+        @if (citaDetalle() && mensajeErrorCompletar(citaDetalle()!.id); as mensajeErrorCompletar) {
+          <p class="px-5 pb-2 text-xs text-red-600" role="alert">
+            {{ mensajeErrorCompletar }}
+          </p>
+        }
 
         <!-- MODAL FOOTER -->
         <div

@@ -9,6 +9,7 @@ describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
   let emailSolicitado: string | undefined;
+  let credencialesEnviadas: { email: string; password: string } | undefined;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -18,6 +19,10 @@ describe('LoginComponent', () => {
         {
           provide: AuthService,
           useValue: {
+            iniciarSesion: (credenciales: { email: string; password: string }) => {
+              credencialesEnviadas = credenciales;
+              return of({ id: 1, nombre: 'Cliente', email: credenciales.email, rol: 'cliente', token: 'token' });
+            },
             solicitarRecuperacionPassword: (email: string) => {
               emailSolicitado = email;
               return of(undefined);
@@ -46,5 +51,34 @@ describe('LoginComponent', () => {
     expect(component.mensajeExitoModal()).toBe(
       'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.',
     );
+  });
+
+  it('rechaza la contraseña cuando supera los 20 caracteres', () => {
+    component.credenciales.email = 'cliente@ejemplo.com';
+    component.credenciales.password = 'c'.repeat(21);
+
+    component.iniciarSesion();
+
+    expect(component.errorPassword()).toBe('La contraseña no puede superar los 20 caracteres.');
+  });
+
+  it('envia la contrasena con sus espacios inicial y final', () => {
+    const password = ' secreta ';
+    component.credenciales.email = 'cliente@ejemplo.com';
+    component.credenciales.password = password;
+
+    component.iniciarSesion();
+
+    expect(credencialesEnviadas?.password).toBe(password);
+  });
+
+  it('acepta exactamente 20 caracteres antes de enviar', () => {
+    component.credenciales.email = 'cliente@ejemplo.com';
+    component.credenciales.password = 'c'.repeat(20);
+
+    component.iniciarSesion();
+
+    expect(component.errorPassword()).toBe('');
+    expect(credencialesEnviadas?.password).toHaveLength(20);
   });
 });
