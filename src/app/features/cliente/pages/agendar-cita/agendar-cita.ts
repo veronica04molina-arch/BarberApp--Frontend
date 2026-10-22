@@ -76,6 +76,7 @@ export class AgendarCita {
 
   private seleccionSubscription?: Subscription;
   private horariosSubscription?: Subscription;
+  private versionSolicitudHorarios = 0;
 
   constructor() {
     this.obtenerParametros();
@@ -134,7 +135,7 @@ export class AgendarCita {
       this.fechaSeleccionada = '';
       this.horaSeleccionada = '';
       this.notas = '';
-      this.horariosSubscription?.unsubscribe();
+      this.cancelarSolicitudHorarios();
       this.horariosDisponibles = [];
       this.cargandoHorarios.set(false);
       this.errorHorarios = '';
@@ -251,7 +252,7 @@ export class AgendarCita {
   }
 
   private limpiarSeleccion(): void {
-    this.horariosSubscription?.unsubscribe();
+    this.cancelarSolicitudHorarios();
     this.idBarbero = 0;
     this.idsServicios = [];
     this.barberoSeleccionado = null;
@@ -289,7 +290,7 @@ export class AgendarCita {
   }
 
   seleccionarFecha(): void {
-    this.horariosSubscription?.unsubscribe();
+    this.cancelarSolicitudHorarios();
     this.horaSeleccionada = '';
     this.horariosDisponibles = [];
     this.cargandoHorarios.set(false);
@@ -316,6 +317,7 @@ export class AgendarCita {
     this.cargandoHorarios.set(true);
     this.errorHorarios = '';
     this.mensajeHorarios = '';
+    const versionSolicitud = this.iniciarSolicitudHorarios();
 
     this.horariosSubscription = this.citasService
       .obtenerHorariosDisponibles(
@@ -327,6 +329,9 @@ export class AgendarCita {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (horarios) => {
+          if (!this.esSolicitudActual(versionSolicitud)) {
+            return;
+          }
           this.horariosDisponibles = horarios;
           this.cargandoHorarios.set(false);
 
@@ -335,6 +340,9 @@ export class AgendarCita {
           }
         },
         error: () => {
+          if (!this.esSolicitudActual(versionSolicitud)) {
+            return;
+          }
           this.horariosDisponibles = [];
           this.cargandoHorarios.set(false);
           this.errorHorarios = 'No fue posible consultar los horarios disponibles.';
@@ -394,7 +402,8 @@ export class AgendarCita {
 
     this.guardandoCita.set(true);
 
-    const guardado = this.estaEditando
+    const esReprogramacion = this.estaEditando;
+    const guardado = esReprogramacion
       ? this.citasService.actualizarCita(this.idCitaEditando!, {
           ...this.citaEditando!,
           id: this.idCitaEditando!,
@@ -410,9 +419,12 @@ export class AgendarCita {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          void this.router.navigate(['/cliente/mis-citas'], {
-            queryParams: this.estaEditando ? { actualizada: '1' } : undefined,
-          });
+          if (esReprogramacion) {
+            this.refrescarDisponibilidadDespuesDeReprogramar();
+            return;
+          }
+
+          void this.router.navigate(['/cliente/mis-citas']);
         },
         error: (error: HttpErrorResponse) => {
           this.guardandoCita.set(false);
@@ -434,6 +446,73 @@ export class AgendarCita {
           }
         },
       });
+  }
+
+  /**
+   * La cita ya se guardó. Esta consulta no debe ignorarla: así la agenda que se
+   * conserva en memoria representa el estado definitivo del servidor, incluido
+   * el nuevo horario ocupado y el anterior liberado.
+   */
+  private refrescarDisponibilidadDespuesDeReprogramar(): void {
+    const idBarbero = this.idBarbero;
+    const fecha = this.fechaSeleccionada;
+    const duracion = this.totalDuracion;
+
+    this.cancelarSolicitudHorarios();
+    this.horariosDisponibles = [];
+    this.horaSeleccionada = '';
+    this.cargandoHorarios.set(true);
+    this.errorHorarios = '';
+    this.mensajeHorarios = '';
+    const versionSolicitud = this.iniciarSolicitudHorarios();
+
+    this.horariosSubscription = this.citasService
+      .obtenerHorariosDisponibles(idBarbero, fecha, duracion)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (horarios) => {
+          if (!this.esSolicitudActual(versionSolicitud)) {
+            return;
+          }
+          this.horariosDisponibles = horarios;
+          this.cargandoHorarios.set(false);
+          this.mensajeHorarios =
+            horarios.length === 0 ? 'No hay horarios disponibles para esta fecha.' : '';
+          this.finalizarReprogramacion();
+        },
+        error: () => {
+          if (!this.esSolicitudActual(versionSolicitud)) {
+            return;
+          }
+          // La reprogramación sí fue persistida. No la presentamos como un error
+          // si falla solamente esta recarga; al volver a entrar se consultará de
+          // nuevo al servidor.
+          this.horariosDisponibles = [];
+          this.cargandoHorarios.set(false);
+          this.finalizarReprogramacion();
+        },
+      });
+  }
+
+  private finalizarReprogramacion(): void {
+    void this.router.navigate(['/cliente/mis-citas'], {
+      queryParams: { actualizada: '1' },
+    });
+  }
+
+  private cancelarSolicitudHorarios(): void {
+    this.versionSolicitudHorarios += 1;
+    this.horariosSubscription?.unsubscribe();
+    this.horariosSubscription = undefined;
+  }
+
+  private iniciarSolicitudHorarios(): number {
+    this.cancelarSolicitudHorarios();
+    return this.versionSolicitudHorarios;
+  }
+
+  private esSolicitudActual(versionSolicitud: number): boolean {
+    return versionSolicitud === this.versionSolicitudHorarios;
   }
 
   regresarServicios(): void {

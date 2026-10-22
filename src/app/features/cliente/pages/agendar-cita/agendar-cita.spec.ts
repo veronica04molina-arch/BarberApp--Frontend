@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 
 import { AuthService } from '../../../../core/services/AuthService';
 import { CitasService } from '../../../../core/services/CitasService';
@@ -94,14 +94,70 @@ describe('AgendarCita', () => {
       }),
     );
     expect(citasService.crearCita).not.toHaveBeenCalled();
+    expect(obtenerHorariosDisponibles).toHaveBeenLastCalledWith(
+      7,
+      '2026-10-18',
+      30,
+    );
     expect(router.navigate).toHaveBeenCalledWith(['/cliente/mis-citas'], {
       queryParams: { actualizada: '1' },
     });
   });
 
   it('ignores the appointment being edited when it asks for available times', () => {
+    const manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+    const fechaFutura = manana.toISOString().slice(0, 10);
+    component.fechaSeleccionada = fechaFutura;
+
     component.seleccionarFecha();
 
-    expect(obtenerHorariosDisponibles).toHaveBeenCalledWith(7, '2026-10-17', 30, 31);
+    expect(obtenerHorariosDisponibles).toHaveBeenCalledWith(7, fechaFutura, 30, 31);
   });
+
+  it('does not show a successful reschedule or refresh availability when the update fails', () => {
+    citasService.actualizarCita.mockReturnValue(
+      throwError(() => new Error('No se pudo guardar la cita')),
+    );
+    component.fechaSeleccionada = '2026-10-18';
+    component.horaSeleccionada = '10:00';
+    component.horariosDisponibles = ['10:00'];
+
+    component.confirmarCita();
+
+    expect(obtenerHorariosDisponibles).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(component.errorGeneral).toBe('Ocurrió un error al confirmar la cita. Intenta de nuevo.');
+  });
+
+  it('keeps the latest availability when the date changes while a request is pending', () => {
+    const respuestas: Subject<string[]>[] = [];
+    obtenerHorariosDisponibles.mockImplementation(() => {
+      const respuesta = new Subject<string[]>();
+      respuestas.push(respuesta);
+      return respuesta.asObservable();
+    });
+    const fechaInicial = fechaFutura(1);
+    const fechaNueva = fechaFutura(2);
+
+    component.fechaSeleccionada = fechaInicial;
+    component.seleccionarFecha();
+    component.fechaSeleccionada = fechaNueva;
+    component.seleccionarFecha();
+
+    respuestas[0].next(['08:00']);
+    respuestas[1].next(['10:00']);
+
+    expect(component.horariosDisponibles).toEqual(['10:00']);
+    expect(component.cargandoHorarios()).toBe(false);
+  });
+
+  function fechaFutura(dias: number): string {
+    const fecha = new Date();
+    fecha.setDate(fecha.getDate() + dias);
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
+  }
 });
